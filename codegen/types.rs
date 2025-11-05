@@ -7,6 +7,14 @@ pub enum ResourceValue {
     Int(i64),
     /// A floating-point value (f64)
     Float(f64),
+    /// A boolean value
+    Bool(bool),
+    /// A color value (hex string like #FF5722 or #AAFF5722)
+    Color(String),
+    /// A URL string  
+    Url(String),
+    /// A dimension value with unit (e.g., "16dp", "24px", "1.5em")
+    Dimension(String),
     /// An array of strings
     StringArray(Vec<String>),
     /// An array of integers
@@ -23,6 +31,10 @@ impl ResourceValue {
             ResourceValue::String(_) => "string",
             ResourceValue::Int(_) => "int",
             ResourceValue::Float(_) => "float",
+            ResourceValue::Bool(_) => "bool",
+            ResourceValue::Color(_) => "color",
+            ResourceValue::Url(_) => "url",
+            ResourceValue::Dimension(_) => "dimension",
             ResourceValue::StringArray(_) => "string_array",
             ResourceValue::IntArray(_) => "int_array",
             ResourceValue::FloatArray(_) => "float_array",

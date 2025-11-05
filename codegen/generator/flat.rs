@@ -1,0 +1,43 @@
+/// Code generation for flat r:: access module
+use std::collections::HashMap;
+
+use crate::codegen::types::ResourceValue;
+use crate::codegen::utils::sanitize_identifier;
+
+/// Generates a flat module `r` with all resources accessible directly
+pub fn generate_r_module(resources: &HashMap<String, Vec<(String, ResourceValue)>>) -> String {
+    let mut code = String::from("\n/// Flat access to all resources via r::RESOURCE_NAME\npub mod r {\n");
+
+    // Re-export all resource types
+    export_resources(&mut code, resources, "string");
+    export_resources(&mut code, resources, "int");
+    export_resources(&mut code, resources, "float");
+    export_resources(&mut code, resources, "bool");
+    export_resources(&mut code, resources, "color");
+    export_resources(&mut code, resources, "url");
+    export_resources(&mut code, resources, "dimension");
+    export_resources(&mut code, resources, "string_array");
+    export_resources(&mut code, resources, "int_array");
+    export_resources(&mut code, resources, "float_array");
+
+    code.push_str("}\n");
+    code
+}
+
+/// Helper to export resources of a given type
+fn export_resources(
+    code: &mut String,
+    resources: &HashMap<String, Vec<(String, ResourceValue)>>,
+    resource_type: &str,
+) {
+    if let Some(items) = resources.get(resource_type) {
+        for (name, _) in items {
+            let sanitized = sanitize_identifier(name).to_uppercase();
+            code.push_str(&format!(
+                "    pub use crate::{}::{};\n",
+                resource_type, sanitized
+            ));
+        }
+    }
+}
+

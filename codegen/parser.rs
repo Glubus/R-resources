@@ -144,6 +144,32 @@ fn handle_text_content(
                         .push((current_name.to_string(), ResourceValue::Float(val)));
                 }
             }
+            "bool" => {
+                if let Ok(val) = text.parse::<bool>() {
+                    resources
+                        .entry("bool".to_string())
+                        .or_default()
+                        .push((current_name.to_string(), ResourceValue::Bool(val)));
+                }
+            }
+            "color" => {
+                resources
+                    .entry("color".to_string())
+                    .or_default()
+                    .push((current_name.to_string(), ResourceValue::Color(text)));
+            }
+            "url" => {
+                resources
+                    .entry("url".to_string())
+                    .or_default()
+                    .push((current_name.to_string(), ResourceValue::Url(text)));
+            }
+            "dimension" => {
+                resources
+                    .entry("dimension".to_string())
+                    .or_default()
+                    .push((current_name.to_string(), ResourceValue::Dimension(text)));
+            }
             _ => {}
         }
     }

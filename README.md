@@ -21,6 +21,10 @@ A Rust library inspired by Android/Kotlin's `R` system for managing resources at
 - `string`: String values
 - `int`: Integer values (i64)
 - `float`: Floating-point values (f64)
+- `bool`: Boolean values (**v0.2.0**)
+- `color`: Color hex strings (**v0.2.0**)
+- `url`: URL strings (**v0.2.0**)
+- `dimension`: Dimension values with units (**v0.2.0**)
 - `string-array`: String arrays
 - `int-array`: Integer arrays
 - `float-array`: Float arrays
