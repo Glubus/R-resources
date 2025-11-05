@@ -1,0 +1,16 @@
+[package]
+name = "r-ressources"
+version = "0.1.0"
+edition = "2021"
+description = "Android-style resource management for Rust - compile-time type-safe resource access"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Glubus/r-ressources"
+authors = ["Glubus"]
+keywords = ["resources", "build-time", "xml", "config"]
+categories = ["config", "development-tools::build-utils"]
+readme = "README.md"
+
+[dependencies]
+
+[build-dependencies]
+quick-xml = "0.38"

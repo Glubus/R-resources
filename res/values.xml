@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strings -->
+    <string name="app_name">My Awesome App</string>
+    <string name="welcome_message">Welcome to our app!</string>
+    <string name="error_network">Network error occurred</string>
+    
+    <!-- Integers -->
+    <int name="max_retries">3</int>
+    <int name="timeout_ms">5000</int>
+    <int name="cache_size">100</int>
+    
+    <!-- Floats -->
+    <float name="default_rate">0.75</float>
+    <float name="tax_rate">0.20</float>
+    <float name="version">1.5</float>
+    
+    <!-- String Arrays -->
+    <string-array name="supported_langs">
+        <item>en</item>
+        <item>fr</item>
+        <item>es</item>
+    </string-array>
+                                                                                                                                                                                                                        
+    <!-- Integer Arrays -->
+    <int-array name="fibonacci">
+        <item>1</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>8</item>
+    </int-array>
+    
+    <!-- Float Arrays -->
+    <float-array name="prices">
+        <item>9.99</item>
+        <item>19.99</item>
+        <item>29.99</item>
+    </float-array>
+</resources>
+
