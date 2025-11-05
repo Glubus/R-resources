@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-11-05
+
+### Added
+- **Nested namespaces**: Support for `<ns name="...">` XML tags to create hierarchical namespaces
+- Resources can now be organized in nested namespaces like `auth/errors/invalid_credentials`
+- Generated Rust modules reflect the namespace hierarchy: `string::auth::errors::INVALID_CREDENTIALS`
+- Reference resolution supports namespaced paths: `@string/auth/title`
+- Flat access `r::` module now exports namespaced resources with flattened aliases
+- New example: `examples/v05_ns.rs`
+- New test suite: `tests/v05_ns.rs`
+- New resource file: `res/namespaces.xml` demonstrating namespace usage
+
+### Changed
+- Resource names are now qualified with namespace paths (e.g., `auth/title` instead of just `title`)
+- All generator modules (basic, advanced, arrays) now generate nested module structures
+- Reference resolution updated to handle paths with `/` separators
+- Flat generator exports from nested modules with appropriate aliases
+
+### Technical
+- Parser tracks namespace stack during XML parsing
+- Backward compatible: resources without namespaces continue to work as before
+- All tests pass with new namespace support
+
 ## [0.4.0] - 2025-11-05
 
 ### Added

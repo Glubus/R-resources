@@ -9,11 +9,28 @@ use super::utils::sanitize_identifier;
 /// Example: Reference { `resource_type`: "string", key: "`app_name`" }
 /// Returns: "`string::APP_NAME`" or "`crate::string::APP_NAME`"
 pub fn resolve_reference_path(resource_type: &str, key: &str, use_crate_prefix: bool) -> String {
-    let sanitized_key = sanitize_identifier(key).to_uppercase();
-    if use_crate_prefix {
-        format!("crate::{resource_type}::{sanitized_key}")
+    // key may be a path like "ns1/ns2/name"
+    let mut parts: Vec<&str> = key.split('/').filter(|s| !s.is_empty()).collect();
+    let const_name = parts
+        .pop()
+        .map(|s| sanitize_identifier(s).to_uppercase())
+        .unwrap_or_else(|| "".to_string());
+    let module_path = parts
+        .into_iter()
+        .map(|s| sanitize_identifier(s))
+        .collect::<Vec<String>>()
+        .join("::");
+
+    let type_prefix = if use_crate_prefix {
+        format!("crate::{resource_type}")
     } else {
-        format!("{resource_type}::{sanitized_key}")
+        resource_type.to_string()
+    };
+
+    if module_path.is_empty() {
+        format!("{type_prefix}::{const_name}")
+    } else {
+        format!("{type_prefix}::{module_path}::{const_name}")
     }
 }
 

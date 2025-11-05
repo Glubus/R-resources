@@ -21,6 +21,7 @@ pub fn parse_resources(xml: &str) -> Result<HashMap<String, Vec<(String, Resourc
     let mut current_profile: Option<String> = None;
     let mut array_items: Vec<String> = Vec::new();
     let mut in_array = false;
+    let mut namespace_stack: Vec<String> = Vec::new();
 
     loop {
         match reader.read_event_into(&mut buf) {
@@ -31,6 +32,7 @@ pub fn parse_resources(xml: &str) -> Result<HashMap<String, Vec<(String, Resourc
                 &mut current_profile,
                 &mut in_array,
                 &mut array_items,
+                &mut namespace_stack,
             ),
             Ok(Event::Text(e)) => on_text(
                 &e,
@@ -48,6 +50,7 @@ pub fn parse_resources(xml: &str) -> Result<HashMap<String, Vec<(String, Resourc
                 &mut in_array,
                 &mut array_items,
                 &mut resources,
+                &mut namespace_stack,
             ),
             Ok(Event::Eof) => break,
             Err(e) => {
@@ -73,20 +76,38 @@ fn handle_start_tag(
     current_profile: &mut Option<String>,
     in_array: &mut bool,
     array_items: &mut Vec<String>,
+    namespace_stack: &mut Vec<String>,
 ) {
     let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
     current_tag.clone_from(&tag_name);
 
     // Extract attributes (do not clear current_name/profile to preserve array context)
+    let mut name_attr: Option<String> = None;
     for attr in e.attributes().flatten() {
         match attr.key.as_ref() {
             b"name" => {
-                *current_name = String::from_utf8_lossy(&attr.value).to_string();
+                name_attr = Some(String::from_utf8_lossy(&attr.value).to_string());
             }
             b"profile" => {
                 *current_profile = Some(String::from_utf8_lossy(&attr.value).to_string());
             }
             _ => {}
+        }
+    }
+
+    // Namespace handling: <ns name="..."> pushes a namespace level
+    if tag_name == "ns" {
+        if let Some(ns_name) = name_attr {
+            namespace_stack.push(ns_name);
+        }
+        // Do not treat <ns> as a resource-bearing tag
+        current_name.clear();
+    } else if let Some(local_name) = name_attr {
+        // Qualify resource name with namespace path if present
+        if namespace_stack.is_empty() {
+            *current_name = local_name;
+        } else {
+            *current_name = format!("{}/{}", namespace_stack.join("/"), local_name);
         }
     }
 
@@ -105,6 +126,7 @@ fn on_start(
     current_profile: &mut Option<String>,
     in_array: &mut bool,
     array_items: &mut Vec<String>,
+    namespace_stack: &mut Vec<String>,
 ) {
     handle_start_tag(
         e,
@@ -113,6 +135,7 @@ fn on_start(
         current_profile,
         in_array,
         array_items,
+        namespace_stack,
     );
 }
 
@@ -174,6 +197,7 @@ fn on_end(
     in_array: &mut bool,
     array_items: &mut Vec<String>,
     resources: &mut HashMap<String, Vec<(String, ResourceValue)>>,
+    namespace_stack: &mut Vec<String>,
 ) {
     let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
 
@@ -186,6 +210,11 @@ fn on_end(
         );
         *in_array = false;
         array_items.clear();
+    }
+
+    // Pop namespace level on </ns>
+    if tag_name == "ns" {
+        namespace_stack.pop();
     }
 
     current_tag.clear();

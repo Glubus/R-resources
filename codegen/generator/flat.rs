@@ -43,8 +43,24 @@ fn export_resources(
                 eprintln!("Warning: skipping empty resource name in type '{resource_type}'");
                 continue;
             }
-            let sanitized = sanitize_identifier(name).to_uppercase();
-            let _ = writeln!(code, "    pub use crate::{resource_type}::{sanitized};");
+            // Split name into path and leaf; build module path for the item
+            let mut parts = name.split('/').filter(|s| !s.is_empty()).peekable();
+            let mut module_path = String::new();
+            let mut leaf = "";
+            while let Some(part) = parts.next() {
+                if parts.peek().is_none() {
+                    leaf = part;
+                } else {
+                    if !module_path.is_empty() { module_path.push_str("::"); }
+                    module_path.push_str(&sanitize_identifier(part));
+                }
+            }
+            let alias = sanitize_identifier(name).to_uppercase();
+            if module_path.is_empty() {
+                let _ = writeln!(code, "    pub use crate::{resource_type}::{} as {alias};", sanitize_identifier(leaf).to_uppercase());
+            } else {
+                let _ = writeln!(code, "    pub use crate::{resource_type}::{module_path}::{} as {alias};", sanitize_identifier(leaf).to_uppercase());
+            }
         }
     }
 }

@@ -8,28 +8,61 @@ use std::fmt::Write as _;
 pub fn generate_string_module(strings: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod string {\n");
 
-    for (name, value) in strings {
-        let const_name = sanitize_identifier(name).to_uppercase();
-        
-        match value {
-            ResourceValue::String(s) => {
-                // For v0.3.0: strings with embedded references are kept as-is
-                // TODO v0.4.0: Add proper interpolation support
-                let _ = writeln!(
-                    code,
-                    "    pub const {}: &str = \"{}\";",
-                    const_name,
-                    s.escape_debug()
-                );
+    // Build a namespace tree from names like "a/b/c"
+    use std::collections::BTreeMap;
+    #[derive(Default)]
+    struct Node<'a> {
+        children: BTreeMap<String, Node<'a>>,
+        items: Vec<(&'a str, &'a ResourceValue)>, // (leaf_name, value)
+    }
+
+    fn insert<'a>(root: &mut Node<'a>, path: &'a str, value: &'a ResourceValue) {
+        let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
+        let mut node = root;
+        while let Some(part) = parts.next() {
+            if parts.peek().is_none() {
+                node.items.push((part, value));
+            } else {
+                let key = sanitize_identifier(part);
+                node = node.children.entry(key).or_default();
             }
-            ResourceValue::Reference { resource_type, key } => {
-                // Generate a reference to another resource
-                let target = references::resolve_reference_path(resource_type, key, true);
-                let _ = writeln!(code, "    pub const {const_name}: &str = {target};");
-            }
-            _ => {}
         }
     }
+
+    let mut root: Node = Default::default();
+    for (name, value) in strings {
+        insert(&mut root, name, value);
+    }
+
+    fn emit_node(code: &mut String, node: &Node, indent: usize) {
+        let pad = " ".repeat(indent);
+        for (mod_name, child) in &node.children {
+            let _ = writeln!(code, "{}pub mod {} {{", pad, mod_name);
+            emit_node(code, child, indent + 4);
+            let _ = writeln!(code, "{}}}", pad);
+        }
+        for (leaf, value) in &node.items {
+            let const_name = sanitize_identifier(leaf).to_uppercase();
+            match *value {
+                ResourceValue::String(ref s) => {
+                    let _ = writeln!(
+                        code,
+                        "{}pub const {}: &str = \"{}\";",
+                        pad,
+                        const_name,
+                        s.escape_debug()
+                    );
+                }
+                ResourceValue::Reference { ref resource_type, ref key } => {
+                    let target = references::resolve_reference_path(resource_type, key, true);
+                    let _ = writeln!(code, "{}pub const {}: &str = {target};", pad, const_name);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    emit_node(&mut code, &root, 4);
 
     code.push_str("}\n");
     code
@@ -38,18 +71,26 @@ pub fn generate_string_module(strings: &[(String, ResourceValue)]) -> String {
 /// Generates the int module
 pub fn generate_int_module(ints: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod int {\n");
-
-    for (name, value) in ints {
-        if let ResourceValue::Int(i) = value {
-            let _ = writeln!(
-                code,
-                "    pub const {}: i64 = {};",
-                sanitize_identifier(name).to_uppercase(),
-                i
-            );
+    use std::collections::BTreeMap;
+    #[derive(Default)]
+    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, i64)> }
+    fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: i64) {
+        let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
+        let mut node = root;
+        while let Some(part) = parts.next() {
+            if parts.peek().is_none() { node.items.push((part, val)); } else {
+                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            }
         }
     }
-
+    let mut root: Node = Default::default();
+    for (name, value) in ints { if let ResourceValue::Int(i) = value { insert(&mut root, name, *i); } }
+    fn emit_node(code: &mut String, node: &Node, indent: usize) {
+        let pad = " ".repeat(indent);
+        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
+        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: i64 = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+    }
+    emit_node(&mut code, &root, 4);
     code.push_str("}\n");
     code
 }
@@ -57,18 +98,26 @@ pub fn generate_int_module(ints: &[(String, ResourceValue)]) -> String {
 /// Generates the float module
 pub fn generate_float_module(floats: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod float {\n");
-
-    for (name, value) in floats {
-        if let ResourceValue::Float(f) = value {
-            let _ = writeln!(
-                code,
-                "    pub const {}: f64 = {};",
-                sanitize_identifier(name).to_uppercase(),
-                f
-            );
+    use std::collections::BTreeMap;
+    #[derive(Default)]
+    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, f64)> }
+    fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: f64) {
+        let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
+        let mut node = root;
+        while let Some(part) = parts.next() {
+            if parts.peek().is_none() { node.items.push((part, val)); } else {
+                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            }
         }
     }
-
+    let mut root: Node = Default::default();
+    for (name, value) in floats { if let ResourceValue::Float(f) = value { insert(&mut root, name, *f); } }
+    fn emit_node(code: &mut String, node: &Node, indent: usize) {
+        let pad = " ".repeat(indent);
+        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
+        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: f64 = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+    }
+    emit_node(&mut code, &root, 4);
     code.push_str("}\n");
     code
 }
@@ -76,18 +125,26 @@ pub fn generate_float_module(floats: &[(String, ResourceValue)]) -> String {
 /// Generates the bool module
 pub fn generate_bool_module(bools: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod bool {\n");
-
-    for (name, value) in bools {
-        if let ResourceValue::Bool(b) = value {
-            let _ = writeln!(
-                code,
-                "    pub const {}: bool = {};",
-                sanitize_identifier(name).to_uppercase(),
-                b
-            );
+    use std::collections::BTreeMap;
+    #[derive(Default)]
+    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, bool)> }
+    fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: bool) {
+        let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
+        let mut node = root;
+        while let Some(part) = parts.next() {
+            if parts.peek().is_none() { node.items.push((part, val)); } else {
+                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            }
         }
     }
-
+    let mut root: Node = Default::default();
+    for (name, value) in bools { if let ResourceValue::Bool(b) = value { insert(&mut root, name, *b); } }
+    fn emit_node(code: &mut String, node: &Node, indent: usize) {
+        let pad = " ".repeat(indent);
+        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
+        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: bool = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+    }
+    emit_node(&mut code, &root, 4);
     code.push_str("}\n");
     code
 }
