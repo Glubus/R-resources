@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2025-11-05
+
+### Changed
+- Refactored test organization: moved all tests from `src/lib.rs` to `tests/` directory
+- Created dedicated test files: `basic_resources.rs`, `errors.rs`, `v02_types.rs`, `concurrency.rs`
+- Improved test maintainability with better separation of concerns
+
+### Technical
+- 20 tests total (18 integration tests + 2 doctests)
+- Cleaner library code without embedded tests
+
 ## [0.2.0] - 2025-11-05
 
 ### Added
