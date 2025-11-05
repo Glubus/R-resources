@@ -7,7 +7,6 @@
     
     <!-- Integers -->
     <int name="max_retries">3</int>
-    <int name="timeout_ms">5000</int>
     <int name="cache_size">100</int>
     
     <!-- Floats -->

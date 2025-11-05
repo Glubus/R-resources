@@ -17,13 +17,17 @@ fn test_string_resources() {
 #[test]
 fn test_int_resources() {
     assert_eq!(int::MAX_RETRIES, 3);
-    assert_eq!(int::TIMEOUT_MS, 5000);
+    // TIMEOUT_MS depends on build profile (debug: 10000, release: 5000)
+    match std::env::var("PROFILE").as_deref() {
+        Ok("release") => assert_eq!(int::TIMEOUT_MS, 5000),
+        _ => assert_eq!(int::TIMEOUT_MS, 10000),
+    }
 }
 
 #[test]
 fn test_float_resources() {
-    assert_eq!(float::DEFAULT_RATE, 0.75);
-    assert_eq!(float::TAX_RATE, 0.20);
+    assert!((float::DEFAULT_RATE - 0.75).abs() < f64::EPSILON);
+    assert!((float::TAX_RATE - 0.20).abs() < f64::EPSILON);
 }
 
 #[test]

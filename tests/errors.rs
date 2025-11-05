@@ -42,6 +42,6 @@ fn test_error_trait_implementation() {
     };
     
     // Test that it implements std::error::Error
-    let _error_trait: &dyn std::error::Error = &err;
+    let _: &dyn std::error::Error = &err;
 }
 

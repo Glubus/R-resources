@@ -1,15 +1,15 @@
 /// Tests for v0.2.0 new resource types
-use r_ressources::*;
+use r_ressources::{bool, color, dimension, int, r, string, url};
 
 #[test]
 fn test_bool_resources() {
-    assert_eq!(bool::DEBUG_MODE, true);
-    assert_eq!(bool::ENABLE_ANALYTICS, false);
-    assert_eq!(bool::SHOW_TUTORIAL, true);
+    assert!(bool::DEBUG_MODE);
+    assert!(!bool::ENABLE_ANALYTICS);
+    assert!(bool::SHOW_TUTORIAL);
     
     // Test flat access
-    assert_eq!(r::DEBUG_MODE, true);
-    assert_eq!(r::ENABLE_ANALYTICS, false);
+    assert!(r::DEBUG_MODE);
+    assert!(!r::ENABLE_ANALYTICS);
 }
 
 #[test]
@@ -51,14 +51,14 @@ fn test_multi_file_loading() {
     assert_eq!(int::MAX_RETRIES, 3);
     
     // Resources from config.xml
-    assert_eq!(bool::DEBUG_MODE, true);
+    assert!(bool::DEBUG_MODE);
     assert_eq!(color::PRIMARY, "#FF5722");
     assert_eq!(url::API_BASE, "https://api.example.com");
     assert_eq!(dimension::PADDING_SMALL, "8dp");
     
     // All accessible via r:: module
     assert_eq!(r::APP_NAME, "My Awesome App");
-    assert_eq!(r::DEBUG_MODE, true);
+    assert!(r::DEBUG_MODE);
     assert_eq!(r::PRIMARY, "#FF5722");
 }
 

@@ -82,6 +82,75 @@
 // Include the generated R struct and modules
 include!(concat!(env!("OUT_DIR"), "/r_generated.rs"));
 
+/// Typed color parsed from hex (e.g., `#RRGGBB` or `#AARRGGBB`).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
+}
+
+impl Color {
+    pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self { Self { r, g, b, a } }
+    pub const fn r(&self) -> u8 { self.r }
+    pub const fn g(&self) -> u8 { self.g }
+    pub const fn b(&self) -> u8 { self.b }
+    pub const fn a(&self) -> u8 { self.a }
+    pub const fn to_rgba_u32(&self) -> u32 {
+        ((self.a as u32) << 24) | ((self.r as u32) << 16) | ((self.g as u32) << 8) | (self.b as u32)
+    }
+    pub const fn to_rgb_tuple(&self) -> (u8, u8, u8) { (self.r, self.g, self.b) }
+}
+
+/// Typed URL parts split at build-time.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct UrlParts {
+    scheme: &'static str,
+    host: &'static str,
+    path: &'static str,
+}
+
+impl UrlParts {
+    pub const fn new(scheme: &'static str, host: &'static str, path: &'static str) -> Self {
+        Self { scheme, host, path }
+    }
+    pub const fn scheme(&self) -> &'static str { self.scheme }
+    pub const fn host(&self) -> &'static str { self.host }
+    pub const fn path(&self) -> &'static str { self.path }
+}
+
+/// 2D position.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Position {
+    x: f64,
+    y: f64,
+}
+
+impl Position {
+    pub const fn new(x: f64, y: f64) -> Self { Self { x, y } }
+    pub const fn x(&self) -> f64 { self.x }
+    pub const fn y(&self) -> f64 { self.y }
+    pub fn distance_to(&self, other: &Self) -> f64 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        (dx * dx + dy * dy).sqrt()
+    }
+}
+
+/// Geographic coordinates.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct LatLng {
+    lat: f64,
+    lng: f64,
+}
+
+impl LatLng {
+    pub const fn new(lat: f64, lng: f64) -> Self { Self { lat, lng } }
+    pub const fn lat(&self) -> f64 { self.lat }
+    pub const fn lng(&self) -> f64 { self.lng }
+}
+
 /// Error types for resource operations
 ///
 /// This enum represents all possible errors that can occur when working with resources.
@@ -120,14 +189,14 @@ pub enum RError {
 impl std::fmt::Display for RError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RError::ResourceNotFound { resource_type, key } => {
-                write!(f, "Resource not found: {}.{}", resource_type, key)
+            Self::ResourceNotFound { resource_type, key } => {
+                write!(f, "Resource not found: {resource_type}.{key}")
             }
-            RError::InvalidResourceFile { path, reason } => {
-                write!(f, "Invalid resource file '{}': {}", path, reason)
+            Self::InvalidResourceFile { path, reason } => {
+                write!(f, "Invalid resource file '{path}': {reason}")
             }
-            RError::TypeMismatch { expected, found } => {
-                write!(f, "Type mismatch: expected {}, found {}", expected, found)
+            Self::TypeMismatch { expected, found } => {
+                write!(f, "Type mismatch: expected {expected}, found {found}")
             }
         }
     }

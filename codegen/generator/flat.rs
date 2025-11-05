@@ -1,12 +1,13 @@
-/// Code generation for flat r:: access module
+/// Code generation for flat `r::` access module
 use std::collections::HashMap;
 
 use crate::codegen::types::ResourceValue;
 use crate::codegen::utils::sanitize_identifier;
+use std::fmt::Write as _;
 
 /// Generates a flat module `r` with all resources accessible directly
 pub fn generate_r_module(resources: &HashMap<String, Vec<(String, ResourceValue)>>) -> String {
-    let mut code = String::from("\n/// Flat access to all resources via r::RESOURCE_NAME\npub mod r {\n");
+    let mut code = String::from("\n/// Flat access to all resources via `r::RESOURCE_NAME`\npub mod r {\n");
 
     // Re-export all resource types
     export_resources(&mut code, resources, "string");
@@ -32,11 +33,12 @@ fn export_resources(
 ) {
     if let Some(items) = resources.get(resource_type) {
         for (name, _) in items {
+            if name.is_empty() {
+                eprintln!("Warning: skipping empty resource name in type '{resource_type}'");
+                continue;
+            }
             let sanitized = sanitize_identifier(name).to_uppercase();
-            code.push_str(&format!(
-                "    pub use crate::{}::{};\n",
-                resource_type, sanitized
-            ));
+            let _ = writeln!(code, "    pub use crate::{resource_type}::{sanitized};");
         }
     }
 }

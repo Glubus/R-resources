@@ -1,18 +1,31 @@
 /// Code generation for advanced types (color, url, dimension)
+use crate::codegen::references;
 use crate::codegen::types::ResourceValue;
 use crate::codegen::utils::sanitize_identifier;
+use std::fmt::Write as _;
 
 /// Generates the color module
 pub fn generate_color_module(colors: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod color {\n");
 
     for (name, value) in colors {
-        if let ResourceValue::Color(c) = value {
-            code.push_str(&format!(
-                "    pub const {}: &str = \"{}\";\n",
-                sanitize_identifier(name).to_uppercase(),
-                c.escape_debug()
-            ));
+        let const_name = sanitize_identifier(name).to_uppercase();
+        
+        match value {
+            ResourceValue::Color(c) => {
+                let _ = writeln!(
+                    code,
+                    "    pub const {}: &str = \"{}\";",
+                    const_name,
+                    c.escape_debug()
+                );
+            }
+            ResourceValue::Reference { resource_type, key } => {
+                // Generate a reference to another resource
+                let target = references::resolve_reference_path(resource_type, key, true);
+                let _ = writeln!(code, "    pub const {const_name}: &str = {target};");
+            }
+            _ => {}
         }
     }
 
@@ -26,11 +39,12 @@ pub fn generate_url_module(urls: &[(String, ResourceValue)]) -> String {
 
     for (name, value) in urls {
         if let ResourceValue::Url(u) = value {
-            code.push_str(&format!(
-                "    pub const {}: &str = \"{}\";\n",
+            let _ = writeln!(
+                code,
+                "    pub const {}: &str = \"{}\";",
                 sanitize_identifier(name).to_uppercase(),
                 u.escape_debug()
-            ));
+            );
         }
     }
 
@@ -44,11 +58,12 @@ pub fn generate_dimension_module(dimensions: &[(String, ResourceValue)]) -> Stri
 
     for (name, value) in dimensions {
         if let ResourceValue::Dimension(d) = value {
-            code.push_str(&format!(
-                "    pub const {}: &str = \"{}\";\n",
+            let _ = writeln!(
+                code,
+                "    pub const {}: &str = \"{}\";",
                 sanitize_identifier(name).to_uppercase(),
                 d.escape_debug()
-            ));
+            );
         }
     }
 

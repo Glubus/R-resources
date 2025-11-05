@@ -1,4 +1,4 @@
-/// Utility functions for code generation
+//! Utility functions for code generation
 
 /// Sanitizes an identifier to be a valid Rust identifier
 ///

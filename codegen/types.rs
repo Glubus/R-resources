@@ -21,23 +21,45 @@ pub enum ResourceValue {
     IntArray(Vec<i64>),
     /// An array of floats
     FloatArray(Vec<f64>),
+    /// A reference to another resource (e.g., @`string/app_name`)
+    Reference { resource_type: String, key: String },
 }
 
 impl ResourceValue {
-    /// Returns the type name of this resource value
+    /// Returns the type name of this resource value as a String
     #[allow(dead_code)]
-    pub fn type_name(&self) -> &'static str {
+    pub fn type_name(&self) -> String {
         match self {
-            ResourceValue::String(_) => "string",
-            ResourceValue::Int(_) => "int",
-            ResourceValue::Float(_) => "float",
-            ResourceValue::Bool(_) => "bool",
-            ResourceValue::Color(_) => "color",
-            ResourceValue::Url(_) => "url",
-            ResourceValue::Dimension(_) => "dimension",
-            ResourceValue::StringArray(_) => "string_array",
-            ResourceValue::IntArray(_) => "int_array",
-            ResourceValue::FloatArray(_) => "float_array",
+            Self::String(_) => "string".to_string(),
+            Self::Int(_) => "int".to_string(),
+            Self::Float(_) => "float".to_string(),
+            Self::Bool(_) => "bool".to_string(),
+            Self::Color(_) => "color".to_string(),
+            Self::Url(_) => "url".to_string(),
+            Self::Dimension(_) => "dimension".to_string(),
+            Self::StringArray(_) => "string_array".to_string(),
+            Self::IntArray(_) => "int_array".to_string(),
+            Self::FloatArray(_) => "float_array".to_string(),
+            Self::Reference { resource_type, .. } => resource_type.clone(),
         }
     }
+    
+    /// Parses a string and returns a `ResourceValue` (detecting references)
+    pub fn parse_string_value(s: &str) -> Self {
+        // Check if it's a pure reference (entire string is @type/name)
+        if s.starts_with('@') && !s.contains(' ') && s.matches('@').count() == 1 {
+            // Reference format: @type/name
+            if let Some((resource_type, key)) = s[1..].split_once('/') {
+                return Self::Reference {
+                    resource_type: resource_type.to_string(),
+                    key: key.to_string(),
+                };
+            }
+        }
+        
+        // Otherwise it's a string (possibly with embedded references)
+        Self::String(s.to_string())
+    }
 }
+
+

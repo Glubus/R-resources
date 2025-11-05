@@ -3,13 +3,14 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use super::environment;
 use super::parser;
 use super::types::ResourceValue;
 
 /// Scans the res/ directory and loads all XML resource files
 pub fn load_all_resources(res_dir: &Path) -> Result<HashMap<String, Vec<(String, ResourceValue)>>, String> {
     if !res_dir.exists() {
-        return Err(format!("Resource directory {:?} does not exist", res_dir));
+        return Err(format!("Resource directory {} does not exist", res_dir.display()));
     }
 
     let xml_files = find_xml_files(res_dir)?;
@@ -19,23 +20,43 @@ pub fn load_all_resources(res_dir: &Path) -> Result<HashMap<String, Vec<(String,
     }
 
     let mut all_resources: HashMap<String, Vec<(String, ResourceValue)>> = HashMap::new();
+    // Track duplicates across files (per type + name)
+    let mut seen: HashMap<String, std::collections::HashMap<String, String>> = HashMap::new(); // type -> (name -> file)
 
     for file_path in &xml_files {
         let content = fs::read_to_string(file_path)
-            .map_err(|e| format!("Failed to read {:?}: {}", file_path, e))?;
+            .map_err(|e| format!("Failed to read {}: {e}", file_path.display()))?;
+        // Preprocess XML by profile before parsing
+        let profile = std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
+        let filtered = environment::preprocess_xml(&content, &profile);
 
-        match parser::parse_resources(&content) {
+        match parser::parse_resources(&filtered) {
             Ok(resources) => {
                 // Merge resources from this file
+                let file_stem = file_path
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("unknown")
+                    .to_string();
+
                 for (res_type, items) in resources {
-                    all_resources
-                        .entry(res_type)
-                        .or_insert_with(Vec::new)
-                        .extend(items);
+                    let entry = all_resources.entry(res_type.clone()).or_default();
+
+                    // Duplicate detection per type/name across files
+                    let seen_for_type = seen.entry(res_type.clone()).or_default();
+                    for (name, value) in &items {
+                        if let Some(prev_file) = seen_for_type.get(name) {
+                            return Err(format!(
+                                "Duplicate resource detected: type='{res_type}' name='{name}' in files '{prev_file}' and '{file_stem}'"
+                            ));
+                        }
+                        seen_for_type.insert(name.clone(), file_stem.clone());
+                        entry.push((name.clone(), value.clone()));
+                    }
                 }
             }
             Err(e) => {
-                eprintln!("Warning: Failed to parse {:?}: {}", file_path, e);
+                eprintln!("Warning: Failed to parse {}: {e}", file_path.display());
             }
         }
     }
@@ -52,10 +73,10 @@ fn find_xml_files(dir: &Path) -> Result<Vec<PathBuf>, String> {
     let mut xml_files = Vec::new();
 
     let entries = fs::read_dir(dir)
-        .map_err(|e| format!("Failed to read directory {:?}: {}", dir, e))?;
+        .map_err(|e| format!("Failed to read directory {}: {e}", dir.display()))?;
 
     for entry in entries {
-        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
+        let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
         let path = entry.path();
 
         if path.is_file() {

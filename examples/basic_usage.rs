@@ -1,4 +1,4 @@
-use r_ressources::*;
+use r_ressources::{float, int, r, string, string_array, int_array, float_array, RError};
 
 fn main() {
     println!("=== R Resources Demo ===\n");
@@ -33,5 +33,5 @@ fn main() {
         resource_type: "string".to_string(),
         key: "non_existent".to_string(),
     };
-    println!("  Error: {}", error);
+    println!("  Error: {error}");
 }

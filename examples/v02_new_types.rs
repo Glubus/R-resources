@@ -1,4 +1,4 @@
-use r_ressources::*;
+use r_ressources::{color, int, r, url};
 
 fn main() {
     println!("=== r-ressources v0.2.0 - New Types Demo ===\n");
@@ -34,7 +34,7 @@ fn main() {
     println!("App: {} (v{})", r::APP_NAME, r::VERSION);
     println!("Theme: Primary={}, Secondary={}", color::PRIMARY, color::SECONDARY);
     println!("API: {}", url::API_BASE);
-    println!("Debug: {}", if bool::DEBUG_MODE { "ON" } else { "OFF" });
+    println!("Debug: {}", if r::DEBUG_MODE { "ON" } else { "OFF" });
     println!("Max Retries: {}", int::MAX_RETRIES);
 }
 

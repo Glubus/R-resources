@@ -1,4 +1,4 @@
-/// Code generators for different resource types
+//! Code generators for different resource types
 
 /// Basic types (string, int, float, bool)
 pub mod basic;
@@ -6,10 +6,10 @@ pub mod basic;
 /// Advanced types (color, url, dimension)
 pub mod advanced;
 
-/// Array types (string_array, int_array, float_array)
+/// Array types (`string_array`, `int_array`, `float_array`)
 pub mod arrays;
 
-/// Flat access module (r::)
+/// Flat access module (`r::`)
 pub mod flat;
 
 use std::collections::HashMap;
@@ -20,7 +20,7 @@ use super::types::ResourceValue;
 ///
 /// # Arguments
 ///
-/// * `resources` - HashMap of resource type to list of (name, value) pairs
+/// * `resources` - `HashMap` of resource type to list of (name, value) pairs
 ///
 /// # Returns
 ///
@@ -83,7 +83,7 @@ pub fn generate_code(resources: &HashMap<String, Vec<(String, ResourceValue)>>) 
 /// Generates an empty R struct (used when no resources file exists)
 pub fn generate_empty_code() -> String {
     String::from(
-        r#"
+        r"
 pub struct R;
 
 impl Default for R {
@@ -93,18 +93,19 @@ impl Default for R {
 }
 
 impl R {
+    #[must_use]
     pub const fn new() -> Self {
-        R
+        Self
     }
 }
-"#,
+",
     )
 }
 
 /// Generates the main R struct
 fn generate_r_struct() -> String {
     String::from(
-        r#"
+        r"
 pub struct R;
 
 impl Default for R {
@@ -114,11 +115,12 @@ impl Default for R {
 }
 
 impl R {
+    #[must_use]
     pub const fn new() -> Self {
-        R
+        Self
     }
 }
-"#,
+",
     )
 }
 
