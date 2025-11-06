@@ -63,8 +63,9 @@ pub fn generate_color_module(colors: &[(String, ResourceValue)]) -> String {
     code.push_str("}\n");
 
     // also generate typed module alongside
-    let mut typed =
-        String::from("\npub mod color_t {\n    #[allow(unused_imports)]\n    use r_ressources::Color;\n");
+    let mut typed = String::from(
+        "\npub mod color_t {\n    #[allow(unused_imports)]\n    use r_ressources::Color;\n",
+    );
     #[derive(Default)]
     struct TNode<'a> {
         children: BTreeMap<String, TNode<'a>>,

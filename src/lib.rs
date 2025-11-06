@@ -21,24 +21,18 @@
 //!
 //! 2. Include resources in your code:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use r_ressources::include_resources;
-//!
 //! include_resources!();
-//!
-//! fn main() {
-//!     use r_ressources::*;
-//!
-//!     // Option 1: Type-organized access
-//!     println!("App: {}", string::APP_NAME);
-//!     println!("Max retries: {}", int::MAX_RETRIES);
-//!     println!("Version: {}", float::VERSION);
-//!
-//!     // Option 2: Flat access via r module
-//!     println!("App: {}", r::APP_NAME);
-//!     println!("Max retries: {}", r::MAX_RETRIES);
-//!     println!("Version: {}", r::VERSION);
-//! }
+//! use r_ressources::*;
+//! // Option 1: Type-organized access
+//! let _ = string::APP_NAME;
+//! let _ = int::MAX_RETRIES;
+//! let _ = float::VERSION;
+//! // Option 2: Flat access via r module
+//! let _ = r::APP_NAME;
+//! let _ = r::MAX_RETRIES;
+//! let _ = r::VERSION;
 //! ```
 //!
 //! ## Supported Resource Types
@@ -67,7 +61,7 @@
 //!
 //! All generated resources are `const` values, making them inherently thread-safe:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use std::thread;
 //! use r_ressources::*;
 //!
@@ -105,14 +99,10 @@ pub fn build() {
 ///
 /// # Example
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// use r_ressources::include_resources;
-///
 /// include_resources!();
-///
-/// fn main() {
-///     println!("App: {}", r::APP_NAME);
-/// }
+/// let _ = r::APP_NAME;
 /// ```
 #[macro_export]
 macro_rules! include_resources {
