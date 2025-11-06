@@ -3,8 +3,8 @@ use quick_xml::Reader;
 use std::collections::HashMap;
 
 use super::types::ResourceValue;
-pub mod basic;
 pub mod advanced;
+pub mod basic;
 
 pub mod arrays;
 pub mod templates;
@@ -131,10 +131,7 @@ fn handle_start_event(
 
 /// Handles XML Empty events (self-closing tags like <param/>)
 /// Note: In quick_xml, Empty events use BytesStart, not a separate type
-fn handle_empty_event(
-    e: &quick_xml::events::BytesStart,
-    state: &mut ParserState,
-) {
+fn handle_empty_event(e: &quick_xml::events::BytesStart, state: &mut ParserState) {
     let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
     if tag_name == "param" && state.in_template {
         parse_param_attributes(e, &mut state.template_state);
@@ -230,5 +227,3 @@ fn handle_end_event(
 
     state.current_tag.clear();
 }
-
-

@@ -27,5 +27,3 @@ fn template_functions_generate_correctly() {
     let result4 = r_ressources::string::status("dave", false);
     assert_eq!(result4, "User dave is false");
 }
-
-

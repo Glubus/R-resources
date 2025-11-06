@@ -31,10 +31,10 @@ pub fn handle_position(
     let parts: Vec<&str> = text.split(',').map(str::trim).collect();
     if parts.len() == 2 {
         if let (Ok(x), Ok(y)) = (parts[0].parse::<f64>(), parts[1].parse::<f64>()) {
-            resources
-                .entry("position".to_string())
-                .or_default()
-                .push((current_name.to_string(), ResourceValue::Dimension(format!("{x},{y}"))));
+            resources.entry("position".to_string()).or_default().push((
+                current_name.to_string(),
+                ResourceValue::Dimension(format!("{x},{y}")),
+            ));
         }
     }
 }
@@ -51,10 +51,10 @@ pub fn handle_latlng(
     if parts.len() == 2 {
         if let (Ok(lat), Ok(lng)) = (parts[0].parse::<f64>(), parts[1].parse::<f64>()) {
             if (-90.0..=90.0).contains(&lat) && (-180.0..=180.0).contains(&lng) {
-                resources
-                    .entry("latlng".to_string())
-                    .or_default()
-                    .push((current_name.to_string(), ResourceValue::Dimension(format!("{lat},{lng}"))));
+                resources.entry("latlng".to_string()).or_default().push((
+                    current_name.to_string(),
+                    ResourceValue::Dimension(format!("{lat},{lng}")),
+                ));
             }
         }
     }
@@ -65,10 +65,10 @@ pub fn handle_url(
     current_name: &str,
     resources: &mut HashMap<String, Vec<(String, ResourceValue)>>,
 ) {
-    resources
-        .entry("url".to_string())
-        .or_default()
-        .push((current_name.to_string(), ResourceValue::Url(text.to_string())));
+    resources.entry("url".to_string()).or_default().push((
+        current_name.to_string(),
+        ResourceValue::Url(text.to_string()),
+    ));
 }
 
 pub fn handle_dimension(
@@ -76,10 +76,8 @@ pub fn handle_dimension(
     current_name: &str,
     resources: &mut HashMap<String, Vec<(String, ResourceValue)>>,
 ) {
-    resources
-        .entry("dimension".to_string())
-        .or_default()
-        .push((current_name.to_string(), ResourceValue::Dimension(text.to_string())));
+    resources.entry("dimension".to_string()).or_default().push((
+        current_name.to_string(),
+        ResourceValue::Dimension(text.to_string()),
+    ));
 }
-
-

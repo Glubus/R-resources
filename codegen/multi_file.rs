@@ -8,9 +8,14 @@ use super::parser;
 use super::types::ResourceValue;
 
 /// Scans the res/ directory and loads all XML resource files
-pub fn load_all_resources(res_dir: &Path) -> Result<HashMap<String, Vec<(String, ResourceValue)>>, String> {
+pub fn load_all_resources(
+    res_dir: &Path,
+) -> Result<HashMap<String, Vec<(String, ResourceValue)>>, String> {
     if !res_dir.exists() {
-        return Err(format!("Resource directory {} does not exist", res_dir.display()));
+        return Err(format!(
+            "Resource directory {} does not exist",
+            res_dir.display()
+        ));
     }
 
     let xml_files = find_xml_files(res_dir)?;
@@ -112,4 +117,3 @@ mod tests {
         assert!(result.is_err());
     }
 }
-

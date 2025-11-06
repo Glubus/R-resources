@@ -29,4 +29,3 @@ fn main() {
     println!("Flat access:    r::APP_NAME = {}", r::APP_NAME);
     println!("Same value: {}", string::APP_NAME == r::APP_NAME);
 }
-

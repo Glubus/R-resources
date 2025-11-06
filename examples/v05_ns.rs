@@ -1,8 +1,8 @@
 fn main() {
     use r_ressources::r;
-    
+
     println!("=== Namespaced Resources (v0.5.0+) ===\n");
-    
+
     // Access namespaced strings via type-organized modules
     println!("Type-organized access:");
     println!("  auth title: {}", r_ressources::string::auth::TITLE);
@@ -27,7 +27,10 @@ fn main() {
 
     // Dimension
     println!("\nDimensions:");
-    println!("  padding: {}", r_ressources::dimension::ui::dimens::PADDING);
+    println!(
+        "  padding: {}",
+        r_ressources::dimension::ui::dimens::PADDING
+    );
     println!("  padding (via r::): {}", r::ui::dimens::PADDING);
 
     // Arrays
@@ -40,5 +43,3 @@ fn main() {
     );
     println!("  ratios: {:?}", r_ressources::float_array::lists::RATIOS);
 }
-
-

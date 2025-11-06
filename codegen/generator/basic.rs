@@ -69,7 +69,9 @@ fn resolve_interpolation_parts(
                 result.push_str(text);
             }
             InterpolationPart::Reference { resource_type, key } => {
-                if let Some(resolved) = resolve_string_value(resource_type, key, all_resources, visited) {
+                if let Some(resolved) =
+                    resolve_string_value(resource_type, key, all_resources, visited)
+                {
                     result.push_str(&resolved);
                 } else {
                     // Reference not found or circular - use placeholder
@@ -118,7 +120,7 @@ fn emit_interpolated_constant(
     let mut visited = HashSet::new();
     let final_string = resolve_interpolation_parts(parts, all_resources, &mut visited)
         .unwrap_or_else(|| "@invalid".to_string());
-    
+
     emit_string_constant(code, const_name, &final_string, indent);
 }
 
@@ -135,9 +137,9 @@ fn emit_template_function(
 ) {
     use crate::codegen::types::TemplateParameterType;
     use crate::codegen::utils::sanitize_identifier;
-    
+
     let pad = " ".repeat(indent);
-    
+
     // Build function signature with typed parameters
     let mut params = Vec::new();
     for param in &template.parameters {
@@ -151,11 +153,11 @@ fn emit_template_function(
         params.push(format!("{param_name}: {rust_type}"));
     }
     let params_str = params.join(", ");
-    
+
     // Parse template string: convert {param} placeholders to format!() syntax
     let template_str = &template.template;
     let (format_str, format_args) = parse_template_placeholders(template_str, &template.parameters);
-    
+
     // Generate function body
     // Note: format! is not const in Rust stable, so this function is not const
     let _ = writeln!(code, "{}#[must_use]", pad);
@@ -188,11 +190,11 @@ fn parse_template_placeholders(
     parameters: &[crate::codegen::types::TemplateParameter],
 ) -> (String, Vec<String>) {
     use crate::codegen::utils::sanitize_identifier;
-    
+
     let mut format_parts = Vec::new();
     let mut format_args = Vec::new();
     let mut current_pos = 0;
-    
+
     while let Some(start) = template_str[current_pos..].find('{') {
         let start_abs = current_pos + start;
         // Add text before placeholder (escape it properly for string literal)
@@ -200,11 +202,11 @@ fn parse_template_placeholders(
         if !text_before.is_empty() {
             format_parts.push(text_before.escape_debug().to_string());
         }
-        
+
         if let Some(end) = template_str[start_abs + 1..].find('}') {
             let end_abs = start_abs + 1 + end;
             let placeholder = &template_str[start_abs + 1..end_abs];
-            
+
             // Find matching parameter and replace with format!() placeholder
             if let Some(param) = parameters.iter().find(|p| p.name == placeholder) {
                 let param_name = sanitize_identifier(&param.name);
@@ -214,7 +216,7 @@ fn parse_template_placeholders(
                 // Unknown placeholder, keep as literal (escape braces)
                 format_parts.push(format!("\\{{{placeholder}\\}}"));
             }
-            
+
             current_pos = end_abs + 1;
         } else {
             // Unclosed brace, treat as literal
@@ -222,13 +224,13 @@ fn parse_template_placeholders(
             current_pos = start_abs + 1;
         }
     }
-    
+
     // Add remaining text after last placeholder
     let remaining = &template_str[current_pos..];
     if !remaining.is_empty() {
         format_parts.push(remaining.escape_debug().to_string());
     }
-    
+
     (format_parts.join(""), format_args)
 }
 
@@ -283,7 +285,10 @@ pub fn generate_string_module(
                 ResourceValue::String(ref s) => {
                     emit_string_constant(code, &const_name, s, pad.len());
                 }
-                ResourceValue::Reference { ref resource_type, ref key } => {
+                ResourceValue::Reference {
+                    ref resource_type,
+                    ref key,
+                } => {
                     emit_reference_constant(code, &const_name, resource_type, key, pad.len());
                 }
                 ResourceValue::InterpolatedString(ref parts) => {
@@ -310,22 +315,44 @@ pub fn generate_int_module(ints: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod int {\n");
     use std::collections::BTreeMap;
     #[derive(Default)]
-    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, i64)> }
+    struct Node<'a> {
+        children: BTreeMap<String, Node<'a>>,
+        items: Vec<(&'a str, i64)>,
+    }
     fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: i64) {
         let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
         let mut node = root;
         while let Some(part) = parts.next() {
-            if parts.peek().is_none() { node.items.push((part, val)); } else {
-                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            if parts.peek().is_none() {
+                node.items.push((part, val));
+            } else {
+                let key = sanitize_identifier(part);
+                node = node.children.entry(key).or_default();
             }
         }
     }
     let mut root: Node = Default::default();
-    for (name, value) in ints { if let ResourceValue::Int(i) = value { insert(&mut root, name, *i); } }
+    for (name, value) in ints {
+        if let ResourceValue::Int(i) = value {
+            insert(&mut root, name, *i);
+        }
+    }
     fn emit_node(code: &mut String, node: &Node, indent: usize) {
         let pad = " ".repeat(indent);
-        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
-        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: i64 = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+        for (k, child) in &node.children {
+            let _ = writeln!(code, "{}pub mod {} {{", pad, k);
+            emit_node(code, child, indent + 4);
+            let _ = writeln!(code, "{}}}", pad);
+        }
+        for (leaf, v) in &node.items {
+            let _ = writeln!(
+                code,
+                "{}pub const {}: i64 = {};",
+                pad,
+                sanitize_identifier(leaf).to_uppercase(),
+                v
+            );
+        }
     }
     emit_node(&mut code, &root, 4);
     code.push_str("}\n");
@@ -337,22 +364,44 @@ pub fn generate_float_module(floats: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod float {\n");
     use std::collections::BTreeMap;
     #[derive(Default)]
-    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, f64)> }
+    struct Node<'a> {
+        children: BTreeMap<String, Node<'a>>,
+        items: Vec<(&'a str, f64)>,
+    }
     fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: f64) {
         let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
         let mut node = root;
         while let Some(part) = parts.next() {
-            if parts.peek().is_none() { node.items.push((part, val)); } else {
-                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            if parts.peek().is_none() {
+                node.items.push((part, val));
+            } else {
+                let key = sanitize_identifier(part);
+                node = node.children.entry(key).or_default();
             }
         }
     }
     let mut root: Node = Default::default();
-    for (name, value) in floats { if let ResourceValue::Float(f) = value { insert(&mut root, name, *f); } }
+    for (name, value) in floats {
+        if let ResourceValue::Float(f) = value {
+            insert(&mut root, name, *f);
+        }
+    }
     fn emit_node(code: &mut String, node: &Node, indent: usize) {
         let pad = " ".repeat(indent);
-        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
-        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: f64 = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+        for (k, child) in &node.children {
+            let _ = writeln!(code, "{}pub mod {} {{", pad, k);
+            emit_node(code, child, indent + 4);
+            let _ = writeln!(code, "{}}}", pad);
+        }
+        for (leaf, v) in &node.items {
+            let _ = writeln!(
+                code,
+                "{}pub const {}: f64 = {};",
+                pad,
+                sanitize_identifier(leaf).to_uppercase(),
+                v
+            );
+        }
     }
     emit_node(&mut code, &root, 4);
     code.push_str("}\n");
@@ -364,25 +413,46 @@ pub fn generate_bool_module(bools: &[(String, ResourceValue)]) -> String {
     let mut code = String::from("\npub mod bool {\n");
     use std::collections::BTreeMap;
     #[derive(Default)]
-    struct Node<'a> { children: BTreeMap<String, Node<'a>>, items: Vec<(&'a str, bool)> }
+    struct Node<'a> {
+        children: BTreeMap<String, Node<'a>>,
+        items: Vec<(&'a str, bool)>,
+    }
     fn insert<'a>(root: &mut Node<'a>, path: &'a str, val: bool) {
         let mut parts = path.split('/').filter(|s| !s.is_empty()).peekable();
         let mut node = root;
         while let Some(part) = parts.next() {
-            if parts.peek().is_none() { node.items.push((part, val)); } else {
-                let key = sanitize_identifier(part); node = node.children.entry(key).or_default();
+            if parts.peek().is_none() {
+                node.items.push((part, val));
+            } else {
+                let key = sanitize_identifier(part);
+                node = node.children.entry(key).or_default();
             }
         }
     }
     let mut root: Node = Default::default();
-    for (name, value) in bools { if let ResourceValue::Bool(b) = value { insert(&mut root, name, *b); } }
+    for (name, value) in bools {
+        if let ResourceValue::Bool(b) = value {
+            insert(&mut root, name, *b);
+        }
+    }
     fn emit_node(code: &mut String, node: &Node, indent: usize) {
         let pad = " ".repeat(indent);
-        for (k, child) in &node.children { let _=writeln!(code, "{}pub mod {} {{", pad, k); emit_node(code, child, indent+4); let _=writeln!(code, "{}}}", pad); }
-        for (leaf, v) in &node.items { let _=writeln!(code, "{}pub const {}: bool = {};", pad, sanitize_identifier(leaf).to_uppercase(), v); }
+        for (k, child) in &node.children {
+            let _ = writeln!(code, "{}pub mod {} {{", pad, k);
+            emit_node(code, child, indent + 4);
+            let _ = writeln!(code, "{}}}", pad);
+        }
+        for (leaf, v) in &node.items {
+            let _ = writeln!(
+                code,
+                "{}pub const {}: bool = {};",
+                pad,
+                sanitize_identifier(leaf).to_uppercase(),
+                v
+            );
+        }
     }
     emit_node(&mut code, &root, 4);
     code.push_str("}\n");
     code
 }
-

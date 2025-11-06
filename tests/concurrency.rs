@@ -61,7 +61,7 @@ fn test_shared_across_threads_with_arc() {
     // Even though Arc is unnecessary for const data,
     // this demonstrates the resources can be used in any threading scenario
     let data = Arc::new(string::APP_NAME);
-    
+
     let handles: Vec<_> = (0..50)
         .map(|_| {
             let data_clone = Arc::clone(&data);
@@ -81,21 +81,20 @@ fn test_shared_across_threads_with_arc() {
 fn test_send_sync_bounds() {
     fn assert_send<T: Send>() {}
     fn assert_sync<T: Sync>() {}
-    
+
     // String constants are Send + Sync
     assert_send::<&'static str>();
     assert_sync::<&'static str>();
-    
+
     // Int constants are Send + Sync
     assert_send::<i64>();
     assert_sync::<i64>();
-    
+
     // Float constants are Send + Sync
     assert_send::<f64>();
     assert_sync::<f64>();
-    
+
     // Array constants are Send + Sync
     assert_send::<&'static [&'static str]>();
     assert_sync::<&'static [&'static str]>();
 }
-

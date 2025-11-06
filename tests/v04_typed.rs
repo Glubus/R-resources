@@ -32,5 +32,3 @@ fn test_latlng_api() {
     assert!((ll.lat() - 48.8566).abs() < f64::EPSILON);
     assert!((ll.lng() - 2.3522).abs() < f64::EPSILON);
 }
-
-

@@ -42,5 +42,3 @@ pub fn handle_array_end(
         _ => {}
     }
 }
-
-

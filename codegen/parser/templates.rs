@@ -30,19 +30,12 @@ impl Default for TemplateState {
 }
 
 /// Handles a template attribute on a string tag
-pub fn handle_template_attribute(
-    attr_value: &str,
-    state: &mut TemplateState,
-) {
+pub fn handle_template_attribute(attr_value: &str, state: &mut TemplateState) {
     state.template_string = Some(attr_value.to_string());
 }
 
 /// Handles a <param> tag within a template
-pub fn handle_param_tag(
-    name: &str,
-    type_str: &str,
-    state: &mut TemplateState,
-) {
+pub fn handle_param_tag(name: &str, type_str: &str, state: &mut TemplateState) {
     let param_type = match type_str.to_lowercase().as_str() {
         "string" => TemplateParameterType::String,
         "int" => TemplateParameterType::Int,
@@ -58,9 +51,7 @@ pub fn handle_param_tag(
 }
 
 /// Finalizes a template and creates a ResourceValue
-pub fn finalize_template(
-    state: &TemplateState,
-) -> Option<ResourceValue> {
+pub fn finalize_template(state: &TemplateState) -> Option<ResourceValue> {
     if let Some(ref template_str) = state.template_string {
         // Create template even if no parameters (empty template)
         // But we require at least the template string to be present
@@ -73,4 +64,3 @@ pub fn finalize_template(
     }
     None
 }
-

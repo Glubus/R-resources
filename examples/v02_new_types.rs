@@ -32,9 +32,12 @@ fn main() {
     // Mixed usage - old and new types together
     println!("\n=== Practical Example ===");
     println!("App: {} (v{})", r::APP_NAME, r::VERSION);
-    println!("Theme: Primary={}, Secondary={}", color::PRIMARY, color::SECONDARY);
+    println!(
+        "Theme: Primary={}, Secondary={}",
+        color::PRIMARY,
+        color::SECONDARY
+    );
     println!("API: {}", url::API_BASE);
     println!("Debug: {}", if r::DEBUG_MODE { "ON" } else { "OFF" });
     println!("Max Retries: {}", int::MAX_RETRIES);
 }
-

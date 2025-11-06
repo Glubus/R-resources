@@ -52,5 +52,3 @@ pub fn handle_bool(
             .push((current_name.to_string(), ResourceValue::Bool(val)));
     }
 }
-
-

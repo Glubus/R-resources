@@ -54,7 +54,7 @@ pub fn build() {
                 }
                 std::process::exit(1);
             }
-            
+
             let code = generator::generate_code(&resources);
             write_generated_code(&code);
         }

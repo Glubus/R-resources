@@ -67,12 +67,28 @@ pub fn validate_references(
         for (name, value) in items {
             match value {
                 ResourceValue::Reference { resource_type, key } => {
-                    validate_single_reference(resource_type, key, res_type, name, resources, &mut errors);
+                    validate_single_reference(
+                        resource_type,
+                        key,
+                        res_type,
+                        name,
+                        resources,
+                        &mut errors,
+                    );
                 }
                 ResourceValue::InterpolatedString(ref parts) => {
                     for part in parts {
-                        if let super::types::InterpolationPart::Reference { resource_type, key } = part {
-                            validate_single_reference(resource_type, key, res_type, name, resources, &mut errors);
+                        if let super::types::InterpolationPart::Reference { resource_type, key } =
+                            part
+                        {
+                            validate_single_reference(
+                                resource_type,
+                                key,
+                                res_type,
+                                name,
+                                resources,
+                                &mut errors,
+                            );
                         }
                     }
                 }
@@ -100,4 +116,3 @@ mod tests {
         );
     }
 }
-

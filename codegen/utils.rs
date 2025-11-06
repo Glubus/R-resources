@@ -5,7 +5,13 @@
 /// Replaces non-alphanumeric characters (except underscores) with underscores
 pub fn sanitize_identifier(s: &str) -> String {
     s.chars()
-        .map(|c| if c.is_alphanumeric() || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect()
 }
 
@@ -21,4 +27,3 @@ mod tests {
         assert_eq!(sanitize_identifier("test123"), "test123");
     }
 }
-

@@ -5,11 +5,11 @@ use r_ressources::*;
 fn test_string_resources() {
     assert_eq!(string::APP_NAME, "My Awesome App");
     assert_eq!(string::WELCOME_MESSAGE, "Welcome to our app!");
-    
+
     // Test flat access
     assert_eq!(r::APP_NAME, "My Awesome App");
     assert_eq!(r::WELCOME_MESSAGE, "Welcome to our app!");
-    
+
     // Both should be the same
     assert_eq!(string::APP_NAME, r::APP_NAME);
 }
@@ -36,4 +36,3 @@ fn test_array_resources() {
     assert_eq!(int_array::FIBONACCI, &[1, 1, 2, 3, 5, 8]);
     assert_eq!(float_array::PRICES, &[9.99, 19.99, 29.99]);
 }
-

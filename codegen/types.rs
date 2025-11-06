@@ -89,7 +89,7 @@ impl ResourceValue {
             Self::Template(_) => "string".to_string(),
         }
     }
-    
+
     /// Parses a string and returns a `ResourceValue` (detecting references and interpolations)
     pub fn parse_string_value(s: &str) -> Self {
         // Check if it's a pure reference (entire string is @type/name)
@@ -102,18 +102,18 @@ impl ResourceValue {
                 };
             }
         }
-        
+
         // Check for interpolated strings (contains @type/name pattern)
         if s.contains('@') {
             let mut parts = Vec::new();
             let mut current_pos = 0;
             let bytes = s.as_bytes();
-            
+
             while current_pos < bytes.len() {
                 // Look for @ symbol
                 if let Some(at_pos) = bytes[current_pos..].iter().position(|&b| b == b'@') {
                     let at_pos = current_pos + at_pos;
-                    
+
                     // Add text before @
                     if at_pos > current_pos {
                         let text = String::from_utf8_lossy(&bytes[current_pos..at_pos]).to_string();
@@ -121,7 +121,7 @@ impl ResourceValue {
                             parts.push(InterpolationPart::Text(text));
                         }
                     }
-                    
+
                     // Try to parse reference after @
                     let after_at = &s[at_pos + 1..];
                     if let Some(slash_pos) = after_at.find('/') {
@@ -139,13 +139,17 @@ impl ResourceValue {
                         if had_trailing_slash {
                             key_slice = &key_slice[..key_slice.len().saturating_sub(1)];
                         }
-                        
+
                         parts.push(InterpolationPart::Reference {
                             resource_type: resource_type.to_string(),
                             key: key_slice.to_string(),
                         });
                         // Do not consume the trailing '/' if it was trimmed; let it appear as literal text
-                        let consumed = if had_trailing_slash { ref_end.saturating_sub(1) } else { ref_end };
+                        let consumed = if had_trailing_slash {
+                            ref_end.saturating_sub(1)
+                        } else {
+                            ref_end
+                        };
                         current_pos = at_pos + 1 + slash_pos + 1 + consumed;
                     } else {
                         // Invalid @ reference, treat as literal
@@ -161,16 +165,14 @@ impl ResourceValue {
                     break;
                 }
             }
-            
+
             // If we found interpolation parts, return InterpolatedString
             if !parts.is_empty() {
                 return Self::InterpolatedString(parts);
             }
         }
-        
+
         // Otherwise it's a simple string
         Self::String(s.to_string())
     }
 }
-
-

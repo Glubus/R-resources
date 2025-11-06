@@ -1,4 +1,4 @@
-use r_ressources::{float, int, string, string_array, int_array, float_array};
+use r_ressources::{float, float_array, int, int_array, string, string_array};
 
 fn main() {
     println!("=== R Resources Demo ===\n");

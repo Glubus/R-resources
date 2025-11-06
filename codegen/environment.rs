@@ -72,7 +72,14 @@ pub fn preprocess_xml(xml: &str, current_profile: &str) -> String {
                 }
             }
             Ok(Event::Eof) => break,
-            Ok(Event::Comment(_) | Event::Decl(_) | Event::CData(_) | Event::PI(_) | Event::DocType(_) | Event::GeneralRef(_)) => {
+            Ok(
+                Event::Comment(_)
+                | Event::Decl(_)
+                | Event::CData(_)
+                | Event::PI(_)
+                | Event::DocType(_)
+                | Event::GeneralRef(_),
+            ) => {
                 // ignore
             }
             Err(_) => {
@@ -125,4 +132,3 @@ mod tests {
         assert!(!profile.is_empty());
     }
 }
-

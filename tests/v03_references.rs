@@ -6,7 +6,7 @@ fn test_string_references() {
     // Base resources
     assert_eq!(string::BASE_URL, "https://api.example.com");
     assert_eq!(string::API_VERSION, "v2");
-    
+
     // References should resolve to the same value
     assert_eq!(string::FULL_API_URL, string::BASE_URL);
     assert_eq!(string::APP_TITLE, string::APP_NAME);
@@ -16,7 +16,7 @@ fn test_string_references() {
 fn test_color_references() {
     // Base color
     assert_eq!(color::ACCENT, "#FF5722");
-    
+
     // Reference should resolve to same color
     assert_eq!(color::BUTTON_COLOR, color::ACCENT);
     assert_eq!(color::BUTTON_COLOR, "#FF5722");
@@ -44,4 +44,3 @@ fn test_cross_type_resource_access() {
     std::hint::black_box(int::MAX_RETRIES);
     std::hint::black_box(bool::DEBUG_MODE);
 }
-

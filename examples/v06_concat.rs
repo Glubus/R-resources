@@ -7,14 +7,6 @@ fn main() {
     );
 
     println!("\n=== Template Functions ===");
-    println!(
-        "greeting: {}",
-        r_ressources::string::greeting("Alice", 5)
-    );
-    println!(
-        "status: {}",
-        r_ressources::string::status("bob", true)
-    );
+    println!("greeting: {}", r_ressources::string::greeting("Alice", 5));
+    println!("status: {}", r_ressources::string::status("bob", true));
 }
-
-
