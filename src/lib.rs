@@ -85,6 +85,19 @@
 //! }
 //! ```
 
+// Reuse the same code generation pipeline as the build script so consumers can
+// call `r_ressources::build()` from their own build.rs
+#[path = "../codegen/mod.rs"]
+mod codegen;
+
+/// Runs the code generation. Intended to be called from a consumer's build.rs.
+///
+/// It scans the consumer project's `res/` directory (using CARGO_MANIFEST_DIR)
+/// and writes generated code to its OUT_DIR.
+pub fn build() {
+    codegen::build();
+}
+
 /// Includes the generated resources from the build script.
 ///
 /// This macro must be called once in your code (typically in `main.rs` or `lib.rs`)

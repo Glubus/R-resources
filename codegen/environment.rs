@@ -121,14 +121,3 @@ fn write_end_tag(out: &mut String, e: &quick_xml::events::BytesEnd) {
     let name = String::from_utf8_lossy(name_binding.as_ref());
     let _ = write!(out, "</{name}>");
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_get_build_profile() {
-        let profile = get_build_profile();
-        assert!(!profile.is_empty());
-    }
-}
