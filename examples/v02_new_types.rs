@@ -1,5 +1,5 @@
-use r_ressources::{color, int, r, url};
-
+use r_ressources::include_resources;
+include_resources!();
 fn main() {
     println!("=== r-ressources v0.2.0 - New Types Demo ===\n");
 

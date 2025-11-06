@@ -1,7 +1,9 @@
 /// Tests to verify thread-safety and concurrent access to resources
-use r_ressources::*;
+use r_ressources::include_resources;
 use std::sync::Arc;
 use std::thread;
+
+include_resources!();
 
 #[test]
 fn test_concurrent_string_access() {

@@ -1,4 +1,5 @@
-use r_ressources::{r, string};
+use r_ressources::include_resources;
+include_resources!();
 
 fn main() {
     println!("=== Flat Access Demo ===\n");

@@ -1,6 +1,6 @@
 fn main() {
-    use r_ressources::r;
-
+    use r_ressources::include_resources;
+    include_resources!();
     println!("=== Namespaced Resources (v0.5.0+) ===\n");
 
     // Access namespaced strings via type-organized modules

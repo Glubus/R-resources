@@ -1,6 +1,7 @@
 #[test]
 fn namespaced_strings_and_refs() {
-    use r_ressources::r;
+    use r_ressources::include_resources;
+    include_resources!();
 
     // Type-organized access
     assert_eq!(r_ressources::string::auth::TITLE, "Login");

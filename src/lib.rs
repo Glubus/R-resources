@@ -19,20 +19,26 @@
 //! </resources>
 //! ```
 //!
-//! 2. Access resources in your code:
+//! 2. Include resources in your code:
 //!
 //! ```rust
-//! use r_ressources::*;
+//! use r_ressources::include_resources;
 //!
-//! // Option 1: Type-organized access
-//! println!("App: {}", string::APP_NAME);
-//! println!("Max retries: {}", int::MAX_RETRIES);
-//! println!("Version: {}", float::VERSION);
+//! include_resources!();
 //!
-//! // Option 2: Flat access via r module
-//! println!("App: {}", r::APP_NAME);
-//! println!("Max retries: {}", r::MAX_RETRIES);
-//! println!("Version: {}", r::VERSION);
+//! fn main() {
+//!     use r_ressources::*;
+//!
+//!     // Option 1: Type-organized access
+//!     println!("App: {}", string::APP_NAME);
+//!     println!("Max retries: {}", int::MAX_RETRIES);
+//!     println!("Version: {}", float::VERSION);
+//!
+//!     // Option 2: Flat access via r module
+//!     println!("App: {}", r::APP_NAME);
+//!     println!("Max retries: {}", r::MAX_RETRIES);
+//!     println!("Version: {}", r::VERSION);
+//! }
 //! ```
 //!
 //! ## Supported Resource Types
@@ -79,8 +85,28 @@
 //! }
 //! ```
 
-// Include the generated R struct and modules
-include!(concat!(env!("OUT_DIR"), "/r_generated.rs"));
+/// Includes the generated resources from the build script.
+///
+/// This macro must be called once in your code (typically in `main.rs` or `lib.rs`)
+/// to include the generated resource constants.
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use r_ressources::include_resources;
+///
+/// include_resources!();
+///
+/// fn main() {
+///     println!("App: {}", r::APP_NAME);
+/// }
+/// ```
+#[macro_export]
+macro_rules! include_resources {
+    () => {
+        include!(concat!(env!("OUT_DIR"), "/r_generated.rs"));
+    };
+}
 
 /// Typed color parsed from hex (e.g., `#RRGGBB` or `#AARRGGBB`).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

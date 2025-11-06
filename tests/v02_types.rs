@@ -1,5 +1,7 @@
 /// Tests for v0.2.0 new resource types
-use r_ressources::{bool, color, dimension, int, r, string, url};
+use r_ressources::include_resources;
+
+include_resources!();
 
 #[test]
 fn test_bool_resources() {

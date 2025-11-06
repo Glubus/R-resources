@@ -1,6 +1,7 @@
 /// Tests for basic resource types (v0.1.0)
-use r_ressources::*;
+use r_ressources::include_resources;
 
+include_resources!();
 #[test]
 fn test_string_resources() {
     assert_eq!(string::APP_NAME, "My Awesome App");

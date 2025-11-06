@@ -1,5 +1,7 @@
 /// Tests for v0.3.0 resource references
-use r_ressources::*;
+use r_ressources::include_resources;
+
+include_resources!();
 
 #[test]
 fn test_string_references() {

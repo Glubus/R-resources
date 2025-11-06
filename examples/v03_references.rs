@@ -1,5 +1,5 @@
-use r_ressources::{color, r, string};
-
+use r_ressources::include_resources;
+include_resources!();
 fn main() {
     println!("=== r-ressources v0.3.0 - References Demo ===\n");
 

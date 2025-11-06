@@ -32,10 +32,13 @@ use std::path::Path;
 /// 3. Generates Rust code from the parsed resources
 /// 4. Writes the generated code to `OUT_DIR/r_generated.rs`
 pub fn build() {
-    let res_dir = Path::new("res");
+    // Use CARGO_MANIFEST_DIR to find res/ in the user's project, not in r-ressources itself
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .expect("CARGO_MANIFEST_DIR environment variable not set");
+    let res_dir = Path::new(&manifest_dir).join("res");
 
     // Watch the entire res/ directory
-    println!("cargo:rerun-if-changed=res");
+    println!("cargo:rerun-if-changed={}", res_dir.display());
 
     if !res_dir.exists() {
         eprintln!("Warning: res/ directory not found, generating empty R struct");
@@ -43,7 +46,7 @@ pub fn build() {
         return;
     }
 
-    match multi_file::load_all_resources(res_dir) {
+    match multi_file::load_all_resources(&res_dir) {
         Ok(resources) => {
             // Validate references
             let ref_errors = references::validate_references(&resources);

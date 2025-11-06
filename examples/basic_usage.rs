@@ -1,4 +1,5 @@
-use r_ressources::{float, float_array, int, int_array, string, string_array};
+use r_ressources::include_resources;
+include_resources!();
 
 fn main() {
     println!("=== R Resources Demo ===\n");

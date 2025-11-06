@@ -1,5 +1,8 @@
 #[test]
 fn interpolated_strings_resolve_at_build_time() {
+    use r_ressources::include_resources;
+    include_resources!();
+
     // From res/advanced.xml
     assert_eq!(
         r_ressources::string::WELCOME_TITLE,

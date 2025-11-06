@@ -1,4 +1,5 @@
-use r_ressources::{color_t, url_t};
+use r_ressources::{include_resources};
+include_resources!();
 
 fn main() {
     println!("=== r-ressources v0.4.0 (typed resources) ===\n");
