@@ -1,0 +1,10 @@
+[package]
+name = "test_r-ressources"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+r-ressources = "0.7.3"
+
+[build-dependencies]
+r-ressources = "0.7.3"

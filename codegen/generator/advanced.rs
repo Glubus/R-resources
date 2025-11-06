@@ -64,7 +64,7 @@ pub fn generate_color_module(colors: &[(String, ResourceValue)]) -> String {
 
     // also generate typed module alongside
     let mut typed =
-        String::from("\npub mod color_t {\n    #[allow(unused_imports)]\n    use crate::Color;\n");
+        String::from("\npub mod color_t {\n    #[allow(unused_imports)]\n    use r_ressources::Color;\n");
     #[derive(Default)]
     struct TNode<'a> {
         children: BTreeMap<String, TNode<'a>>,
@@ -99,7 +99,7 @@ pub fn generate_color_module(colors: &[(String, ResourceValue)]) -> String {
             if let Some((a, r, g, b)) = parse_hex_argb(hex) {
                 let _ = writeln!(
                     code,
-                    "{}pub const {}: crate::Color = crate::Color::new({r}, {g}, {b}, {a});",
+                    "{}pub const {}: r_ressources::Color = r_ressources::Color::new({r}, {g}, {b}, {a});",
                     pad,
                     sanitize_identifier(leaf).to_uppercase()
                 );
@@ -159,7 +159,7 @@ pub fn generate_url_module(urls: &[(String, ResourceValue)]) -> String {
     emit_node(&mut code, &root, 4);
     code.push_str("}\n");
     // typed module
-    let mut typed = String::from("\npub mod url_t {\n    use crate::UrlParts;\n");
+    let mut typed = String::from("\npub mod url_t {\n    use r_ressources::UrlParts;\n");
     #[derive(Default)]
     struct TNode<'a> {
         children: BTreeMap<String, TNode<'a>>,
