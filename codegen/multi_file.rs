@@ -37,34 +37,22 @@ pub fn load_all_resources(
         let profile = std::env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
         let filtered = environment::preprocess_xml(&content, &profile);
 
-        match parser::parse_resources(&filtered) {
-            Ok(resources) => {
-                // Merge resources from this file
-                let file_stem = file_path
-                    .file_stem()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("unknown")
-                    .to_string();
+        let parsed = parser::parse_resources(&filtered);
+        if let Ok(resources) = parsed.as_ref() {
+            // Merge resources from this file
+            let file_stem = file_path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("unknown")
+                .to_string();
 
-                for (res_type, items) in resources {
-                    let entry = all_resources.entry(res_type.clone()).or_default();
-
-                    // Duplicate detection per type/name across files
-                    let seen_for_type = seen.entry(res_type.clone()).or_default();
-                    for (name, value) in &items {
-                        if let Some(prev_file) = seen_for_type.get(name) {
-                            return Err(format!(
-                                "Duplicate resource detected: type='{res_type}' name='{name}' in files '{prev_file}' and '{file_stem}'"
-                            ));
-                        }
-                        seen_for_type.insert(name.clone(), file_stem.clone());
-                        entry.push((name.clone(), value.clone()));
-                    }
-                }
+            if let Err(e) =
+                merge_parsed_resources(&file_stem, resources, &mut all_resources, &mut seen)
+            {
+                return Err(e);
             }
-            Err(e) => {
-                parse_errors.push(format!("Failed to parse {}: {e}", file_path.display()));
-            }
+        } else if let Err(e) = &parsed {
+            parse_errors.push(format!("Failed to parse {}: {e}", file_path.display()));
         }
     }
 
@@ -81,6 +69,34 @@ pub fn load_all_resources(
     }
 
     Ok(all_resources)
+}
+
+/// Merges parsed resources from a single file into the global collections.
+///
+/// Performs duplicate (type+name) detection across files and returns an error
+/// if a duplicate is found.
+fn merge_parsed_resources(
+    file_stem: &str,
+    resources: &HashMap<String, Vec<(String, ResourceValue)>>,
+    all_resources: &mut HashMap<String, Vec<(String, ResourceValue)>>,
+    seen: &mut HashMap<String, std::collections::HashMap<String, String>>,
+) -> Result<(), String> {
+    for (res_type, items) in resources {
+        let entry = all_resources.entry(res_type.clone()).or_default();
+
+        // Duplicate detection per type/name across files
+        let seen_for_type = seen.entry(res_type.clone()).or_default();
+        for (name, value) in items {
+            if let Some(prev_file) = seen_for_type.get(name) {
+                return Err(format!(
+                    "Duplicate resource detected: type='{res_type}' name='{name}' in files '{prev_file}' and '{file_stem}'"
+                ));
+            }
+            seen_for_type.insert(name.clone(), file_stem.to_string());
+            entry.push((name.clone(), value.clone()));
+        }
+    }
+    Ok(())
 }
 
 /// Finds all XML files in a directory (non-recursive)

@@ -92,87 +92,113 @@ impl ResourceValue {
 
     /// Parses a string and returns a `ResourceValue` (detecting references and interpolations)
     pub fn parse_string_value(s: &str) -> Self {
-        // Check if it's a pure reference (entire string is @type/name)
-        if s.starts_with('@') && !s.contains(' ') && s.matches('@').count() == 1 {
-            // Reference format: @type/name
-            if let Some((resource_type, key)) = s[1..].split_once('/') {
-                return Self::Reference {
-                    resource_type: resource_type.to_string(),
-                    key: key.to_string(),
-                };
-            }
+        if let Some((resource_type, key)) = is_pure_reference(s) {
+            return Self::Reference { resource_type, key };
         }
 
-        // Check for interpolated strings (contains @type/name pattern)
-        if s.contains('@') {
-            let mut parts = Vec::new();
-            let mut current_pos = 0;
-            let bytes = s.as_bytes();
-
-            while current_pos < bytes.len() {
-                // Look for @ symbol
-                if let Some(at_pos) = bytes[current_pos..].iter().position(|&b| b == b'@') {
-                    let at_pos = current_pos + at_pos;
-
-                    // Add text before @
-                    if at_pos > current_pos {
-                        let text = String::from_utf8_lossy(&bytes[current_pos..at_pos]).to_string();
-                        if !text.is_empty() {
-                            parts.push(InterpolationPart::Text(text));
-                        }
-                    }
-
-                    // Try to parse reference after @
-                    let after_at = &s[at_pos + 1..];
-                    if let Some(slash_pos) = after_at.find('/') {
-                        let resource_type = &after_at[..slash_pos];
-                        let after_slash = &after_at[slash_pos + 1..];
-                        // Find the end of the reference: first non-alphanumeric/underscore/slash character
-                        let ref_end = after_slash
-                            .char_indices()
-                            .find(|(_, c)| !c.is_alphanumeric() && *c != '_' && *c != '/')
-                            .map(|(i, _)| i)
-                            .unwrap_or(after_slash.len());
-                        let mut key_slice = &after_slash[..ref_end];
-                        // Trim trailing '/' that belongs to following literal or next reference
-                        let had_trailing_slash = key_slice.ends_with('/');
-                        if had_trailing_slash {
-                            key_slice = &key_slice[..key_slice.len().saturating_sub(1)];
-                        }
-
-                        parts.push(InterpolationPart::Reference {
-                            resource_type: resource_type.to_string(),
-                            key: key_slice.to_string(),
-                        });
-                        // Do not consume the trailing '/' if it was trimmed; let it appear as literal text
-                        let consumed = if had_trailing_slash {
-                            ref_end.saturating_sub(1)
-                        } else {
-                            ref_end
-                        };
-                        current_pos = at_pos + 1 + slash_pos + 1 + consumed;
-                    } else {
-                        // Invalid @ reference, treat as literal
-                        parts.push(InterpolationPart::Text("@".to_string()));
-                        current_pos = at_pos + 1;
-                    }
-                } else {
-                    // No more @, add remaining text
-                    let text = String::from_utf8_lossy(&bytes[current_pos..]).to_string();
-                    if !text.is_empty() {
-                        parts.push(InterpolationPart::Text(text));
-                    }
-                    break;
-                }
-            }
-
-            // If we found interpolation parts, return InterpolatedString
-            if !parts.is_empty() {
-                return Self::InterpolatedString(parts);
-            }
+        if let Some(parts) = parse_interpolated_parts(s) {
+            return Self::InterpolatedString(parts);
         }
 
-        // Otherwise it's a simple string
         Self::String(s.to_string())
     }
+}
+
+/// Returns Some((type, key)) if the entire string is a pure reference like `@type/name`.
+fn is_pure_reference(s: &str) -> Option<(String, String)> {
+    if s.starts_with('@') && !s.contains(' ') && s.matches('@').count() == 1 {
+        if let Some((resource_type, key)) = s[1..].split_once('/') {
+            return Some((resource_type.to_string(), key.to_string()));
+        }
+    }
+    None
+}
+
+/// Parses interpolated parts containing one or more `@type/name` references inside text.
+/// Returns None if no interpolation markers are found or parsing yields no parts.
+fn parse_interpolated_parts(s: &str) -> Option<Vec<InterpolationPart>> {
+    if !s.contains('@') {
+        return None;
+    }
+
+    let mut parts = Vec::new();
+    let mut current_pos = 0;
+    let bytes = s.as_bytes();
+
+    while current_pos < bytes.len() {
+        if let Some(at_pos) = find_next_at(bytes, current_pos) {
+            push_text_part(bytes, current_pos, at_pos, &mut parts);
+
+            let after_at = &s[at_pos + 1..];
+            if let Some((resource_type, key, consumed)) = parse_ref_after_at(after_at) {
+                parts.push(InterpolationPart::Reference { resource_type, key });
+                current_pos = at_pos + 1 + consumed;
+            } else {
+                parts.push(InterpolationPart::Text("@".to_string()));
+                current_pos = at_pos + 1;
+            }
+        } else {
+            push_remaining_text(bytes, current_pos, &mut parts);
+            break;
+        }
+    }
+
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts)
+    }
+}
+
+#[inline]
+fn find_next_at(bytes: &[u8], from: usize) -> Option<usize> {
+    bytes[from..]
+        .iter()
+        .position(|&b| b == b'@')
+        .map(|rel| from + rel)
+}
+
+#[inline]
+fn push_text_part(bytes: &[u8], start: usize, end: usize, parts: &mut Vec<InterpolationPart>) {
+    if end > start {
+        let text = String::from_utf8_lossy(&bytes[start..end]).to_string();
+        if !text.is_empty() {
+            parts.push(InterpolationPart::Text(text));
+        }
+    }
+}
+
+#[inline]
+fn push_remaining_text(bytes: &[u8], start: usize, parts: &mut Vec<InterpolationPart>) {
+    let text = String::from_utf8_lossy(&bytes[start..]).to_string();
+    if !text.is_empty() {
+        parts.push(InterpolationPart::Text(text));
+    }
+}
+
+/// Parses a reference right after an '@' and returns (type, key, consumed_len)
+fn parse_ref_after_at(after_at: &str) -> Option<(String, String, usize)> {
+    let slash_pos = after_at.find('/')?;
+    let resource_type = &after_at[..slash_pos];
+    let after_slash = &after_at[slash_pos + 1..];
+
+    let ref_end = after_slash
+        .char_indices()
+        .find(|(_, c)| !c.is_alphanumeric() && *c != '_' && *c != '/')
+        .map(|(i, _)| i)
+        .unwrap_or(after_slash.len());
+
+    let mut key_slice = &after_slash[..ref_end];
+    let had_trailing_slash = key_slice.ends_with('/');
+    if had_trailing_slash {
+        key_slice = &key_slice[..key_slice.len().saturating_sub(1)];
+    }
+
+    let consumed_after_at =
+        1 /* '/' */ + slash_pos + ref_end - if had_trailing_slash { 1 } else { 0 };
+    Some((
+        resource_type.to_string(),
+        key_slice.to_string(),
+        consumed_after_at,
+    ))
 }
