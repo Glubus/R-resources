@@ -1,8 +1,8 @@
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 
 fn main() {
-    println!("=== r-ressources v0.4.0 (typed resources) ===\n");
+    println!("=== r-resources v0.4.0 (typed resources) ===\n");
 
     // Color typed from resources (build-generated)
     let c = color_t::ACCENT;

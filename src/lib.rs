@@ -1,4 +1,4 @@
-//! # r-ressources
+//! # r-resources
 //!
 //! Android-style resource management for Rust with compile-time type safety.
 //!
@@ -22,9 +22,9 @@
 //! 2. Include resources in your code:
 //!
 //! ```rust,ignore
-//! use r_ressources::include_resources;
+//! use r_resources::include_resources;
 //! include_resources!();
-//! use r_ressources::*;
+//! use r_resources::*;
 //! // Option 1: Type-organized access
 //! let _ = string::APP_NAME;
 //! let _ = int::MAX_RETRIES;
@@ -63,7 +63,7 @@
 //!
 //! ```rust,ignore
 //! use std::thread;
-//! use r_ressources::*;
+//! use r_resources::*;
 //!
 //! let handles: Vec<_> = (0..10)
 //!     .map(|_| {
@@ -80,7 +80,7 @@
 //! ```
 
 // Reuse the same code generation pipeline as the build script so consumers can
-// call `r_ressources::build()` from their own build.rs
+// call `r_resources::build()` from their own build.rs
 #[path = "../codegen/mod.rs"]
 mod codegen;
 
@@ -100,7 +100,7 @@ pub fn build() {
 /// # Example
 ///
 /// ```rust,ignore
-/// use r_ressources::include_resources;
+/// use r_resources::include_resources;
 /// include_resources!();
 /// let _ = r::APP_NAME;
 /// ```

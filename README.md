@@ -1,9 +1,9 @@
-# r-ressources
+# r-resources
 
-[![CI](https://github.com/Glubus/r-ressources/workflows/CI/badge.svg)](https://github.com/Glubus/r-ressources/actions)
-[![Crates.io](https://img.shields.io/crates/v/r-ressources.svg)](https://crates.io/crates/r-ressources)
-[![Documentation](https://docs.rs/r-ressources/badge.svg)](https://docs.rs/r-ressources)
-[![License](https://img.shields.io/crates/l/r-ressources.svg)](https://github.com/Glubus/r-ressources#license)
+[![CI](https://github.com/Glubus/r-resources/workflows/CI/badge.svg)](https://github.com/Glubus/r-resources/actions)
+[![Crates.io](https://img.shields.io/crates/v/r-resources.svg)](https://crates.io/crates/r-resources)
+[![Documentation](https://docs.rs/r-resources/badge.svg)](https://docs.rs/r-resources)
+[![License](https://img.shields.io/crates/l/r-resources.svg)](https://github.com/Glubus/r-resources#license)
 
 A Rust library inspired by Android/Kotlin's `R` system for managing resources at build time.
 
@@ -20,7 +20,7 @@ A Rust library inspired by Android/Kotlin's `R` system for managing resources at
 - **Centralized**: All constants in one place - modify quickly without searching 12 files
 - **Framework-agnostic**: Works great with Leptos, egui, or any Rust UI framework
 
-## Why r-ressources?
+## Why r-resources?
 
 ### The Problem
 ```rust
@@ -41,7 +41,7 @@ const RATE: f64 = 0.75;      // billing.rs
 
 ```rust
 // Access anywhere, type-safe, zero-cost
-use r_ressources::r;
+use r_resources::r;
 let retries = r::MAX_RETRIES;
 let timeout = r::TIMEOUT_MS;
 ```
@@ -65,10 +65,10 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [build-dependencies]
-r-ressources = "0.7.5"
+r-resources = "0.7.5"
 ```
 
-**Note**: `r-ressources` is a build dependency, not a runtime dependency. It generates code at compile time. All XML files in the `res/` directory are automatically loaded and merged.
+**Note**: `r-resources` is a build dependency, not a runtime dependency. It generates code at compile time. All XML files in the `res/` directory are automatically loaded and merged.
 
 ## Quick Start
 
@@ -89,7 +89,7 @@ Create `res/values.xml` at the root of your project:
 ### 2. Use your resources
 
 ```rust
-use r_ressources::r;
+use r_resources::r;
 
 fn main() {
     println!("App: {}", r::APP_NAME);
@@ -123,14 +123,14 @@ Organize resources hierarchically:
 
 **Access via type-organized modules:**
 ```rust
-use r_ressources::string;
+use r_resources::string;
 string::auth::TITLE
 string::auth::errors::INVALID_CREDENTIALS
 ```
 
 **Access via Kotlin-style `r::` module:**
 ```rust
-use r_ressources::r;
+use r_resources::r;
 r::auth::TITLE
 r::auth::errors::INVALID_CREDENTIALS
 r::ui::colors::PRIMARY
@@ -213,7 +213,7 @@ let welcome = if locale == "fr" {
 ### Kotlin-style Flat Access (Recommended)
 
 ```rust
-use r_ressources::r;
+use r_resources::r;
 
 // Root level resources
 r::APP_NAME
@@ -228,7 +228,7 @@ r::ui::colors::PRIMARY
 ### Type-Organized Access
 
 ```rust
-use r_ressources::*;
+use r_resources::*;
 
 // Explicit type organization
 string::APP_NAME
@@ -245,7 +245,7 @@ All resources are `const` values, making them completely thread-safe:
 
 ```rust
 use std::thread;
-use r_ressources::r;
+use r_resources::r;
 
 // Safe to access from multiple threads
 let handles: Vec<_> = (0..10)
@@ -266,7 +266,7 @@ let handles: Vec<_> = (0..10)
 
 ## Examples
 
-Run the examples to see r-ressources in action:
+Run the examples to see r-resources in action:
 
 ```bash
 # Basic usage
@@ -306,8 +306,8 @@ Perfect for projects where you need to:
 ### Building from source
 
 ```bash
-git clone https://github.com/Glubus/r-ressources.git
-cd r-ressources
+git clone https://github.com/Glubus/r-resources.git
+cd r-resources
 cargo build
 cargo test
 ```

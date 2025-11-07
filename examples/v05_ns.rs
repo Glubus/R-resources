@@ -1,4 +1,4 @@
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 fn main() {
     println!("=== Namespaced Resources (v0.5.0+) ===\n");

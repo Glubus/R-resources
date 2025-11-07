@@ -1,10 +1,10 @@
 [package]
-name = "r-ressources"
+name = "r-resources"
 version = "0.7.5"
 edition = "2021"
 description = "Android-style resource management for Rust - compile-time type-safe resource access"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Glubus/r-ressources"
+repository = "https://github.com/Glubus/r-resources"
 authors = ["Glubus"]
 keywords = ["resources", "build-time", "xml", "config"]
 categories = ["config", "development-tools::build-utils"]

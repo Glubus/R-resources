@@ -1,4 +1,4 @@
-/// Build script for r-ressources
+/// Build script for r-resources
 ///
 /// This build script generates Rust code from XML resource files at compile time.
 /// It reads `res/values.xml` from the project root and generates type-safe constants

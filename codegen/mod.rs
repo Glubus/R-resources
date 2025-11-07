@@ -32,7 +32,7 @@ use std::path::Path;
 /// 3. Generates Rust code from the parsed resources
 /// 4. Writes the generated code to `OUT_DIR/r_generated.rs`
 pub fn build() {
-    // Use CARGO_MANIFEST_DIR to find res/ in the user's project, not in r-ressources itself
+    // Use CARGO_MANIFEST_DIR to find res/ in the user's project, not in r-resources itself
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
         .expect("CARGO_MANIFEST_DIR environment variable not set");
     let res_dir = Path::new(&manifest_dir).join("res");

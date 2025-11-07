@@ -1,4 +1,4 @@
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 #[test]
 fn interpolated_strings_resolve_at_build_time() {

@@ -1,4 +1,4 @@
-use r_ressources::build;
+use r_resources::build;
 
 fn main() {
     build();

@@ -1,7 +1,7 @@
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 fn main() {
-    println!("=== r-ressources v0.3.0 - References Demo ===\n");
+    println!("=== r-resources v0.3.0 - References Demo ===\n");
 
     // Base resources
     println!("Base resources:");

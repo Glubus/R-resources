@@ -1,5 +1,5 @@
 /// Tests for v0.2.0 new resource types
-use r_ressources::include_resources;
+use r_resources::include_resources;
 
 include_resources!();
 

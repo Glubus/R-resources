@@ -1,4 +1,4 @@
-use r_ressources::{Color, LatLng, Position, UrlParts};
+use r_resources::{Color, LatLng, Position, UrlParts};
 
 #[test]
 fn test_color_api() {

@@ -1,5 +1,5 @@
 /// Tests for basic resource types (v0.1.0)
-use r_ressources::include_resources;
+use r_resources::include_resources;
 
 include_resources!();
 #[test]

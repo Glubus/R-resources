@@ -1,5 +1,5 @@
 // Inclut le code généré (modules r, string, int, float, bool, etc.)
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 
 

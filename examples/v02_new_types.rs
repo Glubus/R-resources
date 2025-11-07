@@ -1,7 +1,7 @@
-use r_ressources::include_resources;
+use r_resources::include_resources;
 include_resources!();
 fn main() {
-    println!("=== r-ressources v0.2.0 - New Types Demo ===\n");
+    println!("=== r-resources v0.2.0 - New Types Demo ===\n");
 
     // Boolean values
     println!("Boolean values:");

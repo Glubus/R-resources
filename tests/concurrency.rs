@@ -1,5 +1,5 @@
 /// Tests to verify thread-safety and concurrent access to resources
-use r_ressources::include_resources;
+use r_resources::include_resources;
 use std::sync::Arc;
 use std::thread;
 

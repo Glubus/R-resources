@@ -1,5 +1,5 @@
 /// Tests for v0.3.0 resource references
-use r_ressources::include_resources;
+use r_resources::include_resources;
 
 include_resources!();
 
