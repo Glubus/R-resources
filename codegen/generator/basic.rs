@@ -394,12 +394,22 @@ pub fn generate_float_module(floats: &[(String, ResourceValue)]) -> String {
             let _ = writeln!(code, "{}}}", pad);
         }
         for (leaf, v) in &node.items {
+            // Format float to ensure it always has a decimal point
+            // This prevents Rust from interpreting values like 3.0 as integers
+            let formatted = {
+                let s = v.to_string();
+                if s.contains('.') || s.contains('e') || s.contains('E') {
+                    s
+                } else {
+                    format!("{s}.0")
+                }
+            };
             let _ = writeln!(
                 code,
                 "{}pub const {}: f64 = {};",
                 pad,
                 sanitize_identifier(leaf).to_uppercase(),
-                v
+                formatted
             );
         }
     }

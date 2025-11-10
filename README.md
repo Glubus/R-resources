@@ -65,7 +65,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [build-dependencies]
-r-resources = "0.7.5"
+r-resources = "0.7.6"
 ```
 
 **Note**: `r-resources` is a build dependency, not a runtime dependency. It generates code at compile time. All XML files in the `res/` directory are automatically loaded and merged.

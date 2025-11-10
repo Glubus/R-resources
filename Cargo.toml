@@ -1,6 +1,6 @@
 [package]
 name = "r-resources"
-version = "0.7.5"
+version = "0.7.6"
 edition = "2021"
 description = "Android-style resource management for Rust - compile-time type-safe resource access"
 license = "MIT OR Apache-2.0"

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.6] - 2025-01-XX
+
+### Fixed
+- **Float formatting**: Fixed issue where float values like `3.00` were incorrectly formatted as integers in generated code
+  - Floats now always include a decimal point (e.g., `3.0` instead of `3`) to prevent type errors
+  - Applies to both single floats and float arrays
+
 ## [0.7.0] - 2025-11-05
 
 ### Added
