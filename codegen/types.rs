@@ -1,3 +1,49 @@
+/// Represents the explicit Rust type requested via `<number type="...">`
+#[derive(Debug, Clone)]
+pub enum NumberType {
+    I8,
+    I16,
+    I32,
+    I64,
+    U8,
+    U16,
+    U32,
+    U64,
+    F32,
+    F64,
+}
+
+impl NumberType {
+    #[must_use]
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::I8 => "i8",
+            Self::I16 => "i16",
+            Self::I32 => "i32",
+            Self::I64 => "i64",
+            Self::U8 => "u8",
+            Self::U16 => "u16",
+            Self::U32 => "u32",
+            Self::U64 => "u64",
+            Self::F32 => "f32",
+            Self::F64 => "f64",
+        }
+    }
+}
+
+/// Represents a parsed numeric value
+#[derive(Debug, Clone)]
+pub enum NumberValue {
+    /// Fits into i64
+    Int(i64),
+    /// Fits into f64
+    Float(f64),
+    /// Requires arbitrary precision
+    BigDecimal(String),
+    /// Explicitly typed numeric constant
+    Typed { literal: String, ty: NumberType },
+}
+
 /// Represents a part of an interpolated string
 #[derive(Debug, Clone)]
 pub enum InterpolationPart {
@@ -43,10 +89,8 @@ pub struct Template {
 pub enum ResourceValue {
     /// A simple string value
     String(String),
-    /// An integer value (i64)
-    Int(i64),
-    /// A floating-point value (f64)
-    Float(f64),
+    /// A numeric value with automatic precision handling
+    Number(NumberValue),
     /// A boolean value
     Bool(bool),
     /// A color value (hex string like #FF5722 or #AAFF5722)
@@ -75,8 +119,7 @@ impl ResourceValue {
     pub fn type_name(&self) -> String {
         match self {
             Self::String(_) => "string".to_string(),
-            Self::Int(_) => "int".to_string(),
-            Self::Float(_) => "float".to_string(),
+            Self::Number(_) => "number".to_string(),
             Self::Bool(_) => "bool".to_string(),
             Self::Color(_) => "color".to_string(),
             Self::Url(_) => "url".to_string(),
@@ -108,7 +151,7 @@ impl ResourceValue {
 fn is_pure_reference(s: &str) -> Option<(String, String)> {
     if s.starts_with('@') && !s.contains(' ') && s.matches('@').count() == 1 {
         if let Some((resource_type, key)) = s[1..].split_once('/') {
-            return Some((resource_type.to_string(), key.to_string()));
+            return Some((canonicalize_resource_type(resource_type), key.to_string()));
         }
     }
     None
@@ -197,8 +240,15 @@ fn parse_ref_after_at(after_at: &str) -> Option<(String, String, usize)> {
     let consumed_after_at =
         1 /* '/' */ + slash_pos + ref_end - if had_trailing_slash { 1 } else { 0 };
     Some((
-        resource_type.to_string(),
+        canonicalize_resource_type(resource_type),
         key_slice.to_string(),
         consumed_after_at,
     ))
+}
+
+fn canonicalize_resource_type(resource_type: &str) -> String {
+    match resource_type {
+        "int" | "float" => "number".to_string(),
+        _ => resource_type.to_string(),
+    }
 }

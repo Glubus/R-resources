@@ -17,7 +17,7 @@ fn main() {
 
     println!("\nFloats:");
     println!("  Default Rate: {}", r::DEFAULT_RATE);
-    println!("  Tax Rate: {}%", r::TAX_RATE * 100.0);
+    println!("  Tax Rate: {}%", r::TAX_RATE * 100.0_f32);
     println!("  Version: {}", r::VERSION);
 
     println!("\nArrays:");
@@ -25,8 +25,5 @@ fn main() {
     println!("  Fibonacci: {:?}", r::FIBONACCI);
     println!("  Prices: {:?}", r::PRICES);
 
-    println!("\n=== Both syntaxes work! ===");
-    println!("Type-organized: string::APP_NAME = {}", string::APP_NAME);
-    println!("Flat access:    r::APP_NAME = {}", r::APP_NAME);
-    println!("Same value: {}", string::APP_NAME == r::APP_NAME);
+    println!("\nAccess stays flat via r:: — no extra modules needed 🎉");
 }

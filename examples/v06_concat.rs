@@ -6,6 +6,6 @@ fn main() {
     println!("api_url_with_version: {}", r::API_URL_WITH_VERSION);
 
     println!("\n=== Template Functions ===");
-    println!("greeting: {}", string::greeting("Alice", 5));
-    println!("status: {}", string::status("bob", true));
+    println!("greeting: {}", r::greeting("Alice", 5));
+    println!("status: {}", r::status("bob", true));
 }

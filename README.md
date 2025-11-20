@@ -34,9 +34,9 @@ const RATE: f64 = 0.75;      // billing.rs
 ### The Solution
 ```xml
 <!-- res/values.xml - One place to rule them all! -->
-<int name="max_retries">3</int>
-<int name="timeout_ms">5000</int>
-<float name="rate">0.75</float>
+<number name="max_retries">3</number>
+<number name="timeout_ms">5000</number>
+<number name="rate">0.75</number>
 ```
 
 ```rust
@@ -49,8 +49,7 @@ let timeout = r::TIMEOUT_MS;
 ## Supported Types
 
 - `string`: String values
-- `int`: Integer values (i64)
-- `float`: Floating-point values (f64)
+- `number`: Automatically typed numerics (`i64`, `f64`, or `BigDecimal` for huge values)
 - `bool`: Boolean values
 - `color`: Color hex strings
 - `url`: URL strings
@@ -58,6 +57,52 @@ let timeout = r::TIMEOUT_MS;
 - `string-array`: String arrays
 - `int-array`: Integer arrays
 - `float-array`: Float arrays
+
+> `number` literals are parsed automatically: whole numbers that fit in `i64` stay integers, decimal values use `f64`, and very large literals fall back to a `LazyLock<BigDecimal>` so you never lose precision.
+> `BigDecimal` is re-exported by `r_resources`, no extra dependency needed.
+
+### Forcing a numeric type
+
+Need an exact Rust type? Add `type="..."` on the `<number>` tag:
+
+```xml
+<number name="max_retries" type="i32">3</number>
+<number name="cache_size" type="u32">100</number>
+<number name="tax_rate" type="f32">0.20</number>
+```
+
+Supported values: `i8`, `i16`, `i32`, `i64`, `u8`, `u16`, `u32`, `u64`, `f32`, `f64`, and `bigdecimal`. Literals are validated at build time so you’ll get a friendly error if something doesn’t fit.
+
+### Test-only resources (`r_tests::`)
+
+Place XML files under `res/tests/` to generate a separate `r_tests::` namespace that is automatically available when running `cargo test`:
+
+```
+res/
+ ├─ values.xml
+ └─ tests/
+     └─ edge_cases.xml
+```
+
+```xml
+<!-- res/tests/edge_cases.xml -->
+<resources>
+    <string name="test_only_message">Only visible in tests</string>
+    <number name="test_limit" type="i32">2147483647</number>
+</resources>
+```
+
+```rust
+use r_resources::include_resources;
+include_resources!();
+
+#[test]
+fn smoke() {
+    assert_eq!(r_tests::TEST_ONLY_MESSAGE, "Only visible in tests");
+}
+```
+
+By default, these resources are only compiled when `cargo test` runs (internally checking `CARGO_CFG_TEST`). To opt-in during other builds, set the env var `R_RESOURCES_INCLUDE_TESTS=1` or call `r_resources::build_with_options` with `tests_res_dir`.
 
 ## Installation
 
@@ -80,8 +125,8 @@ Create `res/values.xml` at the root of your project:
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">My Awesome App</string>
-    <int name="max_retries">3</int>
-    <float name="tax_rate">0.20</float>
+    <number name="max_retries" type="i32">3</number>
+    <number name="tax_rate">0.20</number>
     <bool name="debug_mode">true</bool>
 </resources>
 ```
@@ -94,7 +139,7 @@ use r_resources::r;
 fn main() {
     println!("App: {}", r::APP_NAME);
     println!("Max retries: {}", r::MAX_RETRIES);
-    println!("Tax rate: {}%", r::TAX_RATE * 100.0);
+    println!("Tax rate: {}%", r::TAX_RATE * 100.0_f32);
 }
 ```
 
@@ -121,14 +166,7 @@ Organize resources hierarchically:
 </resources>
 ```
 
-**Access via type-organized modules:**
-```rust
-use r_resources::string;
-string::auth::TITLE
-string::auth::errors::INVALID_CREDENTIALS
-```
-
-**Access via Kotlin-style `r::` module:**
+**Access via the unified `r::` module:**
 ```rust
 use r_resources::r;
 r::auth::TITLE
@@ -149,8 +187,8 @@ Resolve references at build-time:
 
 **Generated:**
 ```rust
-string::WELCOME_TITLE  // "Welcome to My Awesome App!"
-string::API_URL_WITH_VERSION  // "https://api.example.com/v2"
+r::WELCOME_TITLE  // "Welcome to My Awesome App!"
+r::API_URL_WITH_VERSION  // "https://api.example.com/v2"
 ```
 
 All references are resolved at compile-time - no runtime concatenation!
@@ -168,7 +206,7 @@ Generate reusable functions with typed parameters:
 
 **Generated:**
 ```rust
-string::greeting("Alice", 5)  // "Hello Alice, you have 5 messages!"
+r::greeting("Alice", 5)  // "Hello Alice, you have 5 messages!"
 ```
 
 Supports `string`, `int`, `float`, and `bool` parameter types.
@@ -208,9 +246,7 @@ let welcome = if locale == "fr" {
 };
 ```
 
-## Access Patterns
-
-### Kotlin-style Flat Access (Recommended)
+## Access Pattern
 
 ```rust
 use r_resources::r;
@@ -225,19 +261,8 @@ r::auth::errors::INVALID_CREDENTIALS
 r::ui::colors::PRIMARY
 ```
 
-### Type-Organized Access
-
-```rust
-use r_resources::*;
-
-// Explicit type organization
-string::APP_NAME
-int::MAX_RETRIES
-string::auth::TITLE
-color::ui::colors::PRIMARY
-```
-
-Both patterns are equally performant - choose what fits your style!
+> Everything lives under the single `r` module—no juggling type-prefixed modules.
+> Huge numeric constants are exposed as `LazyLock<BigDecimal>` (e.g. `r::HUGE_BALANCE`). Use them directly (`r::HUGE_BALANCE.to_string()`) or borrow via `&*r::HUGE_BALANCE`.
 
 ## Thread Safety
 

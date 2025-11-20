@@ -33,7 +33,7 @@
     <bool name="verbose_logging" profile="debug">true</bool>
     <bool name="verbose_logging" profile="release">false</bool>
     
-    <int name="timeout_ms" profile="debug">10000</int>
-    <int name="timeout_ms" profile="release">5000</int>
+    <number name="timeout_ms" profile="debug" type="i32">10000</number>
+    <number name="timeout_ms" profile="release" type="i32">5000</number>
 </resources>
 

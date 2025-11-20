@@ -14,8 +14,8 @@
 //! <?xml version="1.0" encoding="utf-8"?>
 //! <resources>
 //!     <string name="app_name">My Application</string>
-//!     <int name="max_retries">3</int>
-//!     <float name="version">1.0</float>
+//!     <number name="max_retries">3</number>
+//!     <number name="version">1.0</number>
 //! </resources>
 //! ```
 //!
@@ -24,12 +24,7 @@
 //! ```rust,ignore
 //! use r_resources::include_resources;
 //! include_resources!();
-//! use r_resources::*;
-//! // Option 1: Type-organized access
-//! let _ = string::APP_NAME;
-//! let _ = int::MAX_RETRIES;
-//! let _ = float::VERSION;
-//! // Option 2: Flat access via r module
+//! use r_resources::r;
 //! let _ = r::APP_NAME;
 //! let _ = r::MAX_RETRIES;
 //! let _ = r::VERSION;
@@ -37,21 +32,25 @@
 //!
 //! ## Supported Resource Types
 //!
-//! - **Strings**: `<string name="key">value</string>` → `string::KEY` or `r::KEY`
-//! - **Integers**: `<int name="key">42</int>` → `int::KEY` or `r::KEY`
-//! - **Floats**: `<float name="key">3.14</float>` → `float::KEY` or `r::KEY`
-//! - **String Arrays**: `<string-array name="key">...</string-array>` → `string_array::KEY` or `r::KEY`
-//! - **Integer Arrays**: `<int-array name="key">...</int-array>` → `int_array::KEY` or `r::KEY`
-//! - **Float Arrays**: `<float-array name="key">...</float-array>` → `float_array::KEY` or `r::KEY`
+//! - **Strings**: `<string name="key">value</string>` → `r::KEY`
+//! - **Numbers**: `<number name="key">value</number>` → `r::KEY` (auto-detected `i64`, `f64`, or `BigDecimal`)
+//! - **String Arrays**: `<string-array name="key">...</string-array>` → `r::KEY`
+//! - **Integer Arrays**: `<int-array name="key">...</int-array>` → `r::KEY`
+//! - **Float Arrays**: `<float-array name="key">...</float-array>` → `r::KEY`
 //!
-//! Both access methods are available:
-//! - Type-organized: `string::APP_NAME` (clearer, avoids naming conflicts)
-//! - Flat access: `r::APP_NAME` (shorter, more convenient)
+//! ### Forcing numeric types
+//!
+//! Add `type="..."` to a `<number>` tag to pick an exact Rust type (e.g., `i32`, `u32`, `f32`, `f64`, or `bigdecimal`). Literals are validated at build time.
+//!
+//! ### Test-only resources
+//!
+//! Put XML files under `res/tests/` to generate a `r_tests::` namespace automatically during `cargo test`.
+//! Set the environment variable `R_RESOURCES_INCLUDE_TESTS=1` or call [`build_with_options`] to include them in other builds.
 //!
 //! ## Features
 //!
 //! - **Build-time compilation**: All resources are compiled into your binary
-//! - **Type-safe**: Each resource type has its own module
+//! - **Type-safe**: Each resource becomes a strongly-typed constant
 //! - **Zero runtime cost**: Direct constant access, no parsing or lookups
 //! - **Thread-safe**: All resources are `const` and can be safely accessed from any thread
 //! - **Async-safe**: Works seamlessly in async contexts (tokio, async-std, etc.)
@@ -63,13 +62,13 @@
 //!
 //! ```rust,ignore
 //! use std::thread;
-//! use r_resources::*;
+//! use r_resources::r;
 //!
 //! let handles: Vec<_> = (0..10)
 //!     .map(|_| {
 //!         thread::spawn(|| {
 //!             // Safe to access from multiple threads
-//!             println!("{}", string::APP_NAME);
+//!             println!("{}", r::APP_NAME);
 //!         })
 //!     })
 //!     .collect();
@@ -92,6 +91,13 @@ pub fn build() {
     codegen::build();
 }
 
+pub use codegen::BuildOptions;
+
+/// Builds resources using custom options (for CLI or advanced setups).
+pub fn build_with_options(options: BuildOptions) {
+    codegen::build_with_options(&options);
+}
+
 /// Includes the generated resources from the build script.
 ///
 /// This macro must be called once in your code (typically in `main.rs` or `lib.rs`)
@@ -110,6 +116,8 @@ macro_rules! include_resources {
         include!(concat!(env!("OUT_DIR"), "/r_generated.rs"));
     };
 }
+
+pub use bigdecimal::BigDecimal;
 
 /// Typed color parsed from hex (e.g., `#RRGGBB` or `#AARRGGBB`).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

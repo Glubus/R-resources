@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Unified `<number>` resources**: a single XML tag now covers integers, floats, and huge literals
+  - Whole numbers that fit in `i64` stay `i64`
+  - Decimal literals use `f64`
+  - Very large values automatically become `LazyLock<BigDecimal>` (no precision loss)
+- **Explicit numeric types**: add `type="i32"`, `type="u32"`, `type="f32"`, etc. to force the generated constant type, with compile-time validation
+- **`r_tests::` namespace**: XML files under `res/tests/` are automatically exposed during `cargo test`, giving apps isolated fixtures for edge cases. Opt-in outside tests via `R_RESOURCES_INCLUDE_TESTS=1` or the new `build_with_options`.
+- **Big number fixtures**: sample resources and tests exercise high-precision cases
+
+### Changed
+- Legacy `<int>` and `<float>` tags now feed the same number pipeline (still parsed for backwards compatibility)
+- Generated code re-exports large numbers instead of duplicating constants, ensuring references always share the same storage
+- Documentation and examples now use `<number>` and mention the BigDecimal fallback
+
 ## [0.7.6] - 2025-01-XX
 
 ### Fixed
@@ -40,7 +56,7 @@ All notable changes to this project will be documented in this file.
 - **Template functions**: Generate reusable functions with typed parameters
   - Define templates in XML: `<string name="greeting" template="Hello {name}, you have {count} messages!">`
   - Parameters with types: `<param name="name" type="string"/>`, `<param name="count" type="int"/>`
-  - Generated as Rust functions: `string::greeting(name: &str, count: i64) -> String`
+  - Generated as Rust functions: `r::greeting(name: &str, count: i64) -> String`
   - Support for string, int, float, and bool parameter types
 - **Intelligent alias generation**: Flat module `r::` now uses minimal unique aliases
   - Before: `r::AUTH_ERRORS_INVALID_CREDENTIALS`
@@ -69,7 +85,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Nested namespaces**: Support for `<ns name="...">` XML tags to create hierarchical namespaces
 - Resources can now be organized in nested namespaces like `auth/errors/invalid_credentials`
-- Generated Rust modules reflect the namespace hierarchy: `string::auth::errors::INVALID_CREDENTIALS`
+- Generated Rust modules reflect the namespace hierarchy: `r::auth::errors::INVALID_CREDENTIALS`
 - Reference resolution supports namespaced paths: `@string/auth/title`
 - Flat access `r::` module now exports namespaced resources with flattened aliases
 - New example: `examples/v05_ns.rs`

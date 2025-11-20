@@ -7,8 +7,8 @@ use super::utils::sanitize_identifier;
 /// Resolves a reference to its target resource path
 ///
 /// Example: Reference { `resource_type`: "string", key: "`app_name`" }
-/// Returns: "`string::APP_NAME`" or "`crate::string::APP_NAME`"
-pub fn resolve_reference_path(resource_type: &str, key: &str, use_crate_prefix: bool) -> String {
+/// Returns: "`r::APP_NAME`" or "`crate::r::APP_NAME`"
+pub fn resolve_reference_path(_resource_type: &str, key: &str, use_crate_prefix: bool) -> String {
     // key may be a path like "ns1/ns2/name"
     let mut parts: Vec<&str> = key.split('/').filter(|s| !s.is_empty()).collect();
     let const_name = parts
@@ -21,16 +21,16 @@ pub fn resolve_reference_path(resource_type: &str, key: &str, use_crate_prefix: 
         .collect::<Vec<String>>()
         .join("::");
 
-    let type_prefix = if use_crate_prefix {
-        format!("crate::{resource_type}")
+    let module_prefix = if use_crate_prefix {
+        "crate::r".to_string()
     } else {
-        resource_type.to_string()
+        "r".to_string()
     };
 
     if module_path.is_empty() {
-        format!("{type_prefix}::{const_name}")
+        format!("{module_prefix}::{const_name}")
     } else {
-        format!("{type_prefix}::{module_path}::{const_name}")
+        format!("{module_prefix}::{module_path}::{const_name}")
     }
 }
 
@@ -108,11 +108,11 @@ mod tests {
     fn test_resolve_reference_path() {
         assert_eq!(
             resolve_reference_path("string", "app_name", false),
-            "string::APP_NAME"
+            "r::APP_NAME"
         );
         assert_eq!(
             resolve_reference_path("color", "primary", true),
-            "crate::color::PRIMARY"
+            "crate::r::PRIMARY"
         );
     }
 }

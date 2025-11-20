@@ -1,21 +1,24 @@
-use r_resources::include_resources;
+use r_resources::{include_resources, Color, UrlParts};
 include_resources!();
 
 fn main() {
-    println!("=== r-resources v0.4.0 (typed resources) ===\n");
+    println!("=== r-resources typed helpers ===\n");
 
-    // Color typed from resources (build-generated)
-    let c = color_t::ACCENT;
+    // You can still use the Color helper directly
+    let accent = Color::new(0x33, 0x66, 0xFF, 0xFF);
     println!(
         "Color rgba=({}, {}, {}, {}) rgba_u32=0x{:08X}",
-        c.r(),
-        c.g(),
-        c.b(),
-        c.a(),
-        c.to_rgba_u32()
+        accent.r(),
+        accent.g(),
+        accent.b(),
+        accent.a(),
+        accent.to_rgba_u32()
     );
 
-    // URL typed from resources (build-generated)
-    let api = url_t::API_BASE;
+    // UrlParts helper is also available without generated wrappers
+    let api = UrlParts::new("https", "api.example.com", "/v1");
     println!("Url: {}://{}{}", api.scheme(), api.host(), api.path());
+
+    // Generated resources remain accessible via r::
+    println!("Accent hex literal from resources: {}", r::ACCENT);
 }

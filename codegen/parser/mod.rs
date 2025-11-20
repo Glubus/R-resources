@@ -14,6 +14,7 @@ struct ParserState {
     current_tag: String,
     current_name: String,
     current_profile: Option<String>,
+    current_number_type: Option<String>,
     array_items: Vec<String>,
     in_array: bool,
     namespace_stack: Vec<String>,
@@ -27,6 +28,7 @@ impl ParserState {
             current_tag: String::new(),
             current_name: String::new(),
             current_profile: None,
+            current_number_type: None,
             array_items: Vec::new(),
             in_array: false,
             namespace_stack: Vec::new(),
@@ -79,6 +81,7 @@ fn handle_start_event(
     // Extract attributes
     let mut name_attr: Option<String> = None;
     let mut template_attr: Option<String> = None;
+    let mut number_type_attr: Option<String> = None;
     for attr in e.attributes().flatten() {
         match attr.key.as_ref() {
             b"name" => {
@@ -89,6 +92,9 @@ fn handle_start_event(
             }
             b"template" => {
                 template_attr = Some(String::from_utf8_lossy(&attr.value).to_string());
+            }
+            b"type" => {
+                number_type_attr = Some(String::from_utf8_lossy(&attr.value).to_string());
             }
             _ => {}
         }
@@ -121,6 +127,12 @@ fn handle_start_event(
             state.in_template = true;
             templates::handle_template_attribute(template_str, &mut state.template_state);
         }
+    }
+
+    if matches!(tag_name.as_str(), "number" | "int" | "float") {
+        state.current_number_type = number_type_attr;
+    } else if number_type_attr.is_some() {
+        state.current_number_type = None;
     }
 
     // Handle <param> tags within templates (non-empty tags)
@@ -178,8 +190,12 @@ fn handle_text_event(
         // Don't process text content for templates (they use the template attribute)
         match state.current_tag.as_str() {
             "string" => basic::handle_string(&text, &state.current_name, resources),
-            "int" => basic::handle_int(&text, &state.current_name, resources),
-            "float" => basic::handle_float(&text, &state.current_name, resources),
+            "int" | "float" | "number" => basic::handle_number(
+                &text,
+                &state.current_name,
+                state.current_number_type.as_deref(),
+                resources,
+            ),
             "bool" => basic::handle_bool(&text, &state.current_name, resources),
             "color" => advanced::handle_color(&text, &state.current_name, resources),
             "url" => advanced::handle_url(&text, &state.current_name, resources),
@@ -218,6 +234,10 @@ fn handle_end_event(
         }
         state.template_state.reset();
         state.in_template = false;
+    }
+
+    if matches!(tag_name.as_str(), "number" | "int" | "float") {
+        state.current_number_type = None;
     }
 
     // Pop namespace level on </ns>

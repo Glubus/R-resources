@@ -34,10 +34,10 @@ fn main() {
     println!("App: {} (v{})", r::APP_NAME, r::VERSION);
     println!(
         "Theme: Primary={}, Secondary={}",
-        color::PRIMARY,
-        color::SECONDARY
+        r::PRIMARY,
+        r::SECONDARY
     );
-    println!("API: {}", url::API_BASE);
+    println!("API: {}", r::API_BASE);
     println!("Debug: {}", if r::DEBUG_MODE { "ON" } else { "OFF" });
-    println!("Max Retries: {}", int::MAX_RETRIES);
+    println!("Max Retries: {}", r::MAX_RETRIES);
 }

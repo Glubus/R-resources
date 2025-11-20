@@ -11,7 +11,7 @@ fn test_concurrent_string_access() {
         .map(|_| {
             thread::spawn(|| {
                 // Access from multiple threads simultaneously
-                let name = string::APP_NAME;
+                let name = r::APP_NAME;
                 assert_eq!(name, "My Awesome App");
                 name
             })
@@ -28,7 +28,7 @@ fn test_concurrent_int_access() {
     let handles: Vec<_> = (0..100)
         .map(|_| {
             thread::spawn(|| {
-                let retries = int::MAX_RETRIES;
+                let retries = r::MAX_RETRIES;
                 assert_eq!(retries, 3);
                 retries
             })
@@ -45,7 +45,7 @@ fn test_concurrent_array_access() {
     let handles: Vec<_> = (0..100)
         .map(|_| {
             thread::spawn(|| {
-                let langs = string_array::SUPPORTED_LANGS;
+                let langs = r::SUPPORTED_LANGS;
                 assert_eq!(langs.len(), 3);
                 assert_eq!(langs[0], "en");
                 langs
@@ -62,7 +62,7 @@ fn test_concurrent_array_access() {
 fn test_shared_across_threads_with_arc() {
     // Even though Arc is unnecessary for const data,
     // this demonstrates the resources can be used in any threading scenario
-    let data = Arc::new(string::APP_NAME);
+    let data = Arc::new(r::APP_NAME);
 
     let handles: Vec<_> = (0..50)
         .map(|_| {

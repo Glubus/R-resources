@@ -5,14 +5,14 @@
     <string name="welcome_message">Welcome to our app!</string>
     <string name="error_network">Network error occurred</string>
     
-    <!-- Integers -->
-    <int name="max_retries">3</int>
-    <int name="cache_size">100</int>
-    
-    <!-- Floats -->
-    <float name="default_rate">0.75</float>
-    <float name="tax_rate">0.20</float>
-    <float name="version">1.5</float>
+    <!-- Numbers -->
+    <number name="max_retries" type="i32">3</number>
+    <number name="cache_size" type="u32">100</number>
+    <number name="default_rate">0.75</number>
+    <number name="tax_rate" type="f32">0.20</number>
+    <number name="version">1.5</number>
+    <number name="pi_precise">3.1415926535897932384626433832795</number>
+    <number name="huge_balance">123456789012345678901234567890123456789</number>
     
     <!-- String Arrays -->
     <string-array name="supported_langs">

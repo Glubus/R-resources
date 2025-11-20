@@ -6,25 +6,25 @@ fn main() {
 
     // Strings
     println!("Strings:");
-    println!("  App Name: {}", string::APP_NAME);
-    println!("  Welcome: {}", string::WELCOME_MESSAGE);
-    println!("  Error: {}", string::ERROR_NETWORK);
+    println!("  App Name: {}", r::APP_NAME);
+    println!("  Welcome: {}", r::WELCOME_MESSAGE);
+    println!("  Error: {}", r::ERROR_NETWORK);
 
     // Ints
     println!("\nIntegers:");
-    println!("  Max Retries: {}", int::MAX_RETRIES);
-    println!("  Timeout: {}ms", int::TIMEOUT_MS);
-    println!("  Cache Size: {}", int::CACHE_SIZE);
+    println!("  Max Retries: {}", r::MAX_RETRIES);
+    println!("  Timeout: {}ms", r::TIMEOUT_MS);
+    println!("  Cache Size: {}", r::CACHE_SIZE);
 
     // Floats
     println!("\nFloats:");
-    println!("  Default Rate: {}", float::DEFAULT_RATE);
-    println!("  Tax Rate: {}%", float::TAX_RATE * 100.0);
-    println!("  Version: {}", float::VERSION);
+    println!("  Default Rate: {}", r::DEFAULT_RATE);
+    println!("  Tax Rate: {}%", r::TAX_RATE * 100.0_f32);
+    println!("  Version: {}", r::VERSION);
 
     // Arrays
     println!("\nArrays:");
-    println!("  Supported Languages: {:?}", string_array::SUPPORTED_LANGS);
-    println!("  Fibonacci: {:?}", int_array::FIBONACCI);
-    println!("  Prices: {:?}", float_array::PRICES);
+    println!("  Supported Languages: {:?}", r::SUPPORTED_LANGS);
+    println!("  Fibonacci: {:?}", r::FIBONACCI);
+    println!("  Prices: {:?}", r::PRICES);
 }
