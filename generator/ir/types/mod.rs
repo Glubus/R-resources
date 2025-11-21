@@ -2,6 +2,7 @@
 //!
 //! Pour ajouter un nouveau type, créez simplement un fichier `ir/types/your_type.rs`
 //! et implémentez le trait `ResourceType`.
+mod array;
 mod bool;
 mod color;
 mod number;
@@ -93,6 +94,7 @@ impl Default for TypeRegistry {
         registry.register(Box::new(bool::BoolType));
         registry.register(Box::new(color::ColorType));
         registry.register(Box::new(template::TemplateType));
+        registry.register(Box::new(array::ArrayType));
         registry
     }
 }

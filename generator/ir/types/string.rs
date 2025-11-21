@@ -4,7 +4,7 @@ use crate::generator::ir::{
     ResourceValue,
 };
 use crate::generator::parsing::{ParsedResource, ScalarValue};
-use crate::generator::utils::sanitize_identifier;
+use crate::generator::utils::{format_doc, sanitize_identifier};
 
 pub struct StringType;
 
@@ -31,6 +31,7 @@ impl ResourceType for StringType {
                 kind: ResourceKind::String,
                 value: ResourceValue::String(value.clone()),
                 origin,
+                doc: parsed.doc.clone(),
             })
         } else {
             None
@@ -48,7 +49,8 @@ impl ResourceType for StringType {
             let const_name =
                 sanitize_identifier(&key.name).to_uppercase();
             let escaped = value.escape_debug();
-            Some(format!("{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
+            let doc_str = format_doc(&node.doc, indent);
+            Some(format!("{doc_str}{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
         } else {
             None
         }

@@ -19,4 +19,10 @@ fn main() {
     println!("  Auto Big Decimal: {:?}", r::AUTO_BIG_DECIMAL.to_string());
 
     println!("  Welcome Message: {}", r::welcome_message("John", r_resources::BigDecimal::from_str("10").unwrap()));
+
+    println!("  Numbers BigDecimal: {:?}", r::NUMBERS_BIGDECIMAL.iter().map(|v| v.to_string()).collect::<Vec<_>>());
+    println!("  Numbers I64: {:?}", r::NUMBERS_I64);
+    println!("  Strings: {:?}", r::STRINGS);
+    println!("  Bools: {:?}", r::BOOLS);
+    println!("  Colors: {:?}", r::COLORS);
 }

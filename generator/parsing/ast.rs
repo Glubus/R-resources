@@ -26,6 +26,7 @@ pub struct ParsedResource {
     pub name: String,
     pub kind: ResourceKind,
     pub value: ScalarValue,
+    pub doc: Option<String>, // Documentation comment
 }
 
 impl ParsedResource {
@@ -37,6 +38,7 @@ impl ParsedResource {
             name: name.into(),
             kind: ResourceKind::String,
             value: ScalarValue::Text(value.into()),
+            doc: None,
         }
     }
 
@@ -52,6 +54,7 @@ impl ParsedResource {
                 value: value.into(),
                 explicit_type,
             },
+            doc: None,
         }
     }
 
@@ -60,6 +63,7 @@ impl ParsedResource {
             name: name.into(),
             kind: ResourceKind::Bool,
             value: ScalarValue::Bool(value),
+            doc: None,
         }
     }
 }
@@ -71,7 +75,27 @@ pub enum ResourceKind {
     Bool,
     Color,
     Template,
-    // TODO: array, etc.
+    Array,
+    Namespace, // For <ns> tags
+    Item,      // For <item> tags in arrays
+    Doc,       // For <doc> tags
+}
+
+impl ResourceKind {
+    /// Converts a string tag name to a `ResourceKind`.
+    pub fn from_str(tag: &str) -> Self {
+        match tag {
+            "ns" => Self::Namespace,
+            "template" => Self::Template,
+            "array" => Self::Array,
+            "string" => Self::String,
+            "number" | "int" | "float" => Self::Number,
+            "bool" => Self::Bool,
+            "color" => Self::Color,
+            "item" => Self::Item,
+            _ => Self::String, // Default fallback
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -86,6 +110,11 @@ pub enum ScalarValue {
     Template {
         text: String,
         params: Vec<TemplateParam>,
+    },
+    Array {
+        element_type: String, // "string", "number", "bool", "color"
+        spec: Option<String>, // For numbers: "i64", "f64", "bigdecimal", etc.
+        items: Vec<String>, // Array items as strings (will be parsed based on type)
     },
 }
 
@@ -104,6 +133,7 @@ impl ScalarValue {
             Self::Bool(_) => None,
             Self::Color(_) => None,
             Self::Template { text, .. } => Some(text.as_str()),
+            Self::Array { .. } => None,
         }
     }
 

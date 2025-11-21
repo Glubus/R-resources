@@ -5,7 +5,7 @@ use crate::generator::ir::{
     ResourceValue,
 };
 use crate::generator::parsing::{ParsedResource, ScalarValue};
-use crate::generator::utils::sanitize_identifier;
+use crate::generator::utils::{format_doc, sanitize_identifier};
 
 pub struct TemplateType;
 
@@ -65,6 +65,7 @@ impl ResourceType for TemplateType {
                         params: model_params,
                     },
                     origin,
+                    doc: parsed.doc.clone(),
                 })
             }
             // Templates detected from placeholders in strings
@@ -83,6 +84,7 @@ impl ResourceType for TemplateType {
                             params: Vec::new(),
                         },
                         origin,
+                        doc: parsed.doc.clone(),
                     })
                 } else {
                     None
@@ -101,6 +103,7 @@ impl ResourceType for TemplateType {
         if let ResourceValue::Template { text, params } = &node.value {
             let pad = " ".repeat(indent);
             let func_name = sanitize_identifier(&key.name);
+            let doc_str = format_doc(&node.doc, indent);
             
             // If we have named parameters, use them
             if !params.is_empty() {
@@ -151,7 +154,7 @@ impl ResourceType for TemplateType {
                 let param_names_str = param_names.join(", ");
                 
                 Some(format!(
-                    "{pad}pub fn {func_name}({params_str}) -> String {{\n\
+                    "{doc_str}{pad}pub fn {func_name}({params_str}) -> String {{\n\
                     {pad}    format!(\"{format_escaped}\", {param_names_str})\n\
                     {pad}}}\n"
                 ))
@@ -162,7 +165,7 @@ impl ResourceType for TemplateType {
                     // No placeholders, treat as regular string (use uppercase for consts)
                     let escaped = text.escape_debug();
                     let const_name = func_name.to_uppercase();
-                    Some(format!("{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
+                    Some(format!("{doc_str}{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
                 } else {
                     // Old-style placeholders %1$s, %2$d, etc.
                     let params: Vec<String> = (1..=placeholder_count)
@@ -320,6 +323,7 @@ mod tests {
             name: "welcome_message".to_string(),
             kind: AstResourceKind::String, // Templates can be detected in strings
             value: ScalarValue::Text("Hello %1$s!".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -342,6 +346,7 @@ mod tests {
             name: "welcome_message".to_string(),
             kind: AstResourceKind::Template, // Explicit template tag
             value: ScalarValue::Text("Hello %1$s!".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -363,6 +368,7 @@ mod tests {
             name: "simple_string".to_string(),
             kind: AstResourceKind::String,
             value: ScalarValue::Text("Hello World".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -378,6 +384,7 @@ mod tests {
             name: "not_template".to_string(),
             kind: AstResourceKind::Bool,
             value: ScalarValue::Bool(true),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -400,6 +407,7 @@ mod tests {
                 params: vec![],
             },
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -423,6 +431,7 @@ mod tests {
                 params: vec![],
             },
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -447,6 +456,7 @@ mod tests {
                 params: vec![],
             },
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -466,6 +476,7 @@ mod tests {
             kind: ModelResourceKind::Template,
             value: ResourceValue::String("Hello".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4);
@@ -487,6 +498,7 @@ mod tests {
                 params: vec![],
             },
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 8).unwrap();
@@ -508,6 +520,7 @@ mod tests {
                 params: vec![],
             },
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();

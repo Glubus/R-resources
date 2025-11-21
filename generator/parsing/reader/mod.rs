@@ -11,7 +11,7 @@ use crate::generator::input::RawResourceFile;
 
 use super::ast::ParsedResourceFile;
 use super::error::ParserError;
-use handlers::{handle_end, handle_start, handle_text};
+use handlers::{handle_end, handle_mid, handle_start};
 use state::ParseState;
 
 pub(super) fn parse_single_file(
@@ -32,7 +32,7 @@ pub(super) fn parse_single_file(
                 handle_start(&mut state, &e);
             }
             Ok(Event::Text(e)) => {
-                if let Some(res) = handle_text(&mut state, &e) {
+                if let Some(res) = handle_mid(&mut state, &e) {
                     resources.push(res);
                 }
             }
@@ -305,6 +305,290 @@ mod tests {
             }
         } else {
             panic!("Expected Template value");
+        }
+    }
+
+    #[test]
+    fn parse_string_array() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="fruits" type="string">
+        <item>Apple</item>
+        <item>Banana</item>
+        <item>Orange</item>
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "fruits")
+            .unwrap();
+        assert_eq!(
+            array.kind,
+            crate::generator::parsing::ResourceKind::Array
+        );
+        if let crate::generator::parsing::ScalarValue::Array {
+            element_type,
+            spec,
+            items,
+        } = &array.value
+        {
+            assert_eq!(element_type, "string");
+            assert_eq!(spec, &None);
+            assert_eq!(items.len(), 3);
+            assert_eq!(items[0], "Apple");
+            assert_eq!(items[1], "Banana");
+            assert_eq!(items[2], "Orange");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_number_array_with_bigdecimal_spec() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="big_numbers" type="number" spec="bigdecimal">
+        <item>12345678901234567890.123456789</item>
+        <item>98765432109876543210.987654321</item>
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "big_numbers")
+            .unwrap();
+        assert_eq!(
+            array.kind,
+            crate::generator::parsing::ResourceKind::Array
+        );
+        if let crate::generator::parsing::ScalarValue::Array {
+            element_type,
+            spec,
+            items,
+        } = &array.value
+        {
+            assert_eq!(element_type, "number");
+            assert_eq!(spec, &Some("bigdecimal".to_string()));
+            assert_eq!(items.len(), 2);
+            assert_eq!(items[0], "12345678901234567890.123456789");
+            assert_eq!(items[1], "98765432109876543210.987654321");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_number_array_auto_detect() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="numbers" type="number">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "numbers")
+            .unwrap();
+        if let crate::generator::parsing::ScalarValue::Array {
+            element_type,
+            spec,
+            items,
+        } = &array.value
+        {
+            assert_eq!(element_type, "number");
+            assert_eq!(spec, &None);
+            assert_eq!(items.len(), 3);
+            assert_eq!(items[0], "1");
+            assert_eq!(items[1], "2");
+            assert_eq!(items[2], "3");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_bool_array() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="flags" type="bool">
+        <item>true</item>
+        <item>false</item>
+        <item>true</item>
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "flags")
+            .unwrap();
+        if let crate::generator::parsing::ScalarValue::Array {
+            element_type,
+            spec,
+            items,
+        } = &array.value
+        {
+            assert_eq!(element_type, "bool");
+            assert_eq!(spec, &None);
+            assert_eq!(items.len(), 3);
+            assert_eq!(items[0], "true");
+            assert_eq!(items[1], "false");
+            assert_eq!(items[2], "true");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_color_array() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="colors" type="color">
+        <item>#FF0000</item>
+        <item>#00FF00</item>
+        <item>#0000FF</item>
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "colors")
+            .unwrap();
+        if let crate::generator::parsing::ScalarValue::Array {
+            element_type,
+            spec,
+            items,
+        } = &array.value
+        {
+            assert_eq!(element_type, "color");
+            assert_eq!(spec, &None);
+            assert_eq!(items.len(), 3);
+            assert_eq!(items[0], "#FF0000");
+            assert_eq!(items[1], "#00FF00");
+            assert_eq!(items[2], "#0000FF");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_array_in_namespace() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <ns name="ui">
+        <array name="themes" type="string">
+            <item>light</item>
+            <item>dark</item>
+        </array>
+    </ns>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "ui/themes")
+            .unwrap();
+        assert_eq!(
+            array.kind,
+            crate::generator::parsing::ResourceKind::Array
+        );
+        if let crate::generator::parsing::ScalarValue::Array { items, .. } = &array.value {
+            assert_eq!(items.len(), 2);
+            assert_eq!(items[0], "light");
+            assert_eq!(items[1], "dark");
+        } else {
+            panic!("Expected Array value");
+        }
+    }
+
+    #[test]
+    fn parse_empty_array() {
+        let raw = RawResourceFile::new(
+            PathBuf::from("values.xml"),
+            r#"
+<resources>
+    <array name="empty" type="string">
+    </array>
+</resources>
+"#
+            .into(),
+            false,
+        );
+
+        let file = parse_single_file(&raw).unwrap();
+        assert_eq!(file.resources.len(), 1);
+
+        let array = file
+            .resources
+            .iter()
+            .find(|r| r.name == "empty")
+            .unwrap();
+        if let crate::generator::parsing::ScalarValue::Array { items, .. } = &array.value {
+            assert_eq!(items.len(), 0);
+        } else {
+            panic!("Expected Array value");
         }
     }
 }

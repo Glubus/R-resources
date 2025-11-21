@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <doc>Application name displayed to users</doc>
     <string name="app_name">r-resources</string>
     <number name="max_retries">3</number>
     <number name="timeout_ms">5000</number>
@@ -26,4 +27,31 @@
         <number name="count" type="bigdecimal"/>
         Welcome to {name}, you have {count} messages!
     </template>
+
+    <array name="numbers_bigdecimal" type="number" spec="bigdecimal">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </array>
+
+    <array name="numbers_i64" type="number">
+        <item>1245678901230</item>
+        <item>9865436543210</item>
+        <item>1389012345678</item>
+    </array>
+
+    <array name="strings" type="string">
+        <item>Hello</item>
+        <item>World</item>
+    </array>
+
+    <array name="bools" type="bool">
+        <item>true</item>
+        <item>false</item>
+    </array>
+
+    <array name="colors" type="color">
+        <item>#FF0000</item>
+        <item>#00FF00</item>
+    </array>
 </resources>

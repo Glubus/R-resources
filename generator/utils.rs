@@ -3,6 +3,25 @@
 /// Sanitizes an identifier to be a valid Rust identifier
 ///
 /// Replaces non-alphanumeric characters (except underscores) with underscores
+/// Formats documentation comment for Rust code generation
+pub fn format_doc(doc: &Option<String>, indent: usize) -> String {
+    if let Some(doc_text) = doc {
+        let pad = " ".repeat(indent);
+        // Split by newlines and add /// prefix to each line
+        let lines: Vec<String> = doc_text
+            .lines()
+            .map(|line| format!("{pad}/// {}", line.trim()))
+            .collect();
+        if lines.is_empty() {
+            String::new()
+        } else {
+            format!("{}\n", lines.join("\n"))
+        }
+    } else {
+        String::new()
+    }
+}
+
 pub fn sanitize_identifier(s: &str) -> String {
     s.chars()
         .map(|c| {

@@ -87,6 +87,7 @@ pub struct ResourceNode {
     pub kind: ResourceKind,
     pub value: ResourceValue,
     pub origin: ResourceOrigin,
+    pub doc: Option<String>, // Documentation comment
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -159,7 +160,11 @@ pub enum ResourceValue {
         text: String,
         params: Vec<TemplateParam>,
     },
-    // TODO: add arrays, references, etc.
+    Array {
+        element_type: String,
+        spec: Option<String>,
+        items: Vec<String>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -215,6 +220,7 @@ mod tests {
             kind: ResourceKind::String,
             value: ResourceValue::String("value".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let is_duplicate = graph.insert(key.clone(), node);
@@ -231,11 +237,13 @@ mod tests {
             kind: ResourceKind::String,
             value: ResourceValue::String("first".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test1.xml"), false),
+            doc: None,
         };
         let node2 = ResourceNode {
             kind: ResourceKind::String,
             value: ResourceValue::String("second".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test2.xml"), false),
+            doc: None,
         };
 
         let is_dup1 = graph.insert(key.clone(), node1);
@@ -254,11 +262,13 @@ mod tests {
             kind: ResourceKind::String,
             value: ResourceValue::String("first".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test1.xml"), false),
+            doc: None,
         };
         let node2 = ResourceNode {
             kind: ResourceKind::String,
             value: ResourceValue::String("second".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test2.xml"), false),
+            doc: None,
         };
 
         graph.insert(key.clone(), node1);
@@ -279,11 +289,13 @@ mod tests {
             kind: ResourceKind::String,
             value: ResourceValue::String("first".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test1.xml"), false),
+            doc: None,
         };
         let node2 = ResourceNode {
             kind: ResourceKind::String,
             value: ResourceValue::String("second".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test2.xml"), false),
+            doc: None,
         };
 
         graph.insert(key.clone(), node1);
@@ -309,11 +321,13 @@ mod tests {
             kind: ResourceKind::String,
             value: ResourceValue::String("first".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test1.xml"), false),
+            doc: None,
         };
         let node2 = ResourceNode {
             kind: ResourceKind::String,
             value: ResourceValue::String("second".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test2.xml"), false),
+            doc: None,
         };
 
         graph.insert(key.clone(), node1);

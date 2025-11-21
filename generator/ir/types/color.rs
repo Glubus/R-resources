@@ -4,7 +4,7 @@ use crate::generator::ir::{
     ResourceValue,
 };
 use crate::generator::parsing::{ParsedResource, ScalarValue};
-use crate::generator::utils::sanitize_identifier;
+use crate::generator::utils::{format_doc, sanitize_identifier};
 
 pub struct ColorType;
 
@@ -31,6 +31,7 @@ impl ResourceType for ColorType {
                 kind: ResourceKind::Color,
                 value: ResourceValue::Color(value.clone()),
                 origin,
+                doc: parsed.doc.clone(),
             })
         } else {
             None
@@ -48,7 +49,8 @@ impl ResourceType for ColorType {
             let const_name =
                 sanitize_identifier(&key.name).to_uppercase();
             let escaped = value.escape_debug();
-            Some(format!("{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
+            let doc_str = format_doc(&node.doc, indent);
+            Some(format!("{doc_str}{pad}pub const {const_name}: &str = \"{escaped}\";\n"))
         } else {
             None
         }
@@ -93,6 +95,7 @@ mod tests {
             name: "primary_color".to_string(),
             kind: AstResourceKind::Color,
             value: ScalarValue::Color("#FF0000".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -114,6 +117,7 @@ mod tests {
             name: "bg_color".to_string(),
             kind: AstResourceKind::Color,
             value: ScalarValue::Color("rgb(255, 0, 0)".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -132,6 +136,7 @@ mod tests {
             name: "text_color".to_string(),
             kind: AstResourceKind::Color,
             value: ScalarValue::Color("red".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -150,6 +155,7 @@ mod tests {
             name: "not_color".to_string(),
             kind: AstResourceKind::Color,
             value: ScalarValue::Text("not a color".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -165,6 +171,7 @@ mod tests {
             name: "not_color".to_string(),
             kind: AstResourceKind::Bool,
             value: ScalarValue::Bool(true),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -184,6 +191,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("#FF0000".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -203,6 +211,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("rgb(255, 0, 0)".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -222,6 +231,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("blue".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -241,6 +251,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("#FF\"test\"".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -264,6 +275,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Bool(true),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4);
@@ -282,6 +294,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("#000000".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 8).unwrap();
@@ -301,6 +314,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("#FF0000".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -320,6 +334,7 @@ mod tests {
             kind: ModelResourceKind::Color,
             value: ResourceValue::Color("".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();

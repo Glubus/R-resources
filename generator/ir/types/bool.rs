@@ -4,7 +4,7 @@ use crate::generator::ir::{
     ResourceValue,
 };
 use crate::generator::parsing::{ParsedResource, ScalarValue};
-use crate::generator::utils::sanitize_identifier;
+use crate::generator::utils::{format_doc, sanitize_identifier};
 
 pub struct BoolType;
 
@@ -31,6 +31,7 @@ impl ResourceType for BoolType {
                 kind: ResourceKind::Bool,
                 value: ResourceValue::Bool(*value),
                 origin,
+                doc: parsed.doc.clone(),
             })
         } else {
             None
@@ -47,8 +48,9 @@ impl ResourceType for BoolType {
             let pad = " ".repeat(indent);
             let const_name =
                 sanitize_identifier(&key.name).to_uppercase();
+            let doc_str = format_doc(&node.doc, indent);
             Some(format!(
-                "{pad}pub const {const_name}: bool = {value};\n"
+                "{doc_str}{pad}pub const {const_name}: bool = {value};\n"
             ))
         } else {
             None
@@ -94,6 +96,7 @@ mod tests {
             name: "enabled".to_string(),
             kind: AstResourceKind::Bool,
             value: ScalarValue::Bool(true),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -112,6 +115,7 @@ mod tests {
             name: "disabled".to_string(),
             kind: AstResourceKind::Bool,
             value: ScalarValue::Bool(false),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -128,6 +132,7 @@ mod tests {
             name: "not_bool".to_string(),
             kind: AstResourceKind::Bool,
             value: ScalarValue::Text("not a bool".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -143,6 +148,7 @@ mod tests {
             name: "not_bool".to_string(),
             kind: AstResourceKind::Color,
             value: ScalarValue::Color("#FF0000".to_string()),
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -162,6 +168,7 @@ mod tests {
             kind: ModelResourceKind::Bool,
             value: ResourceValue::Bool(true),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -180,6 +187,7 @@ mod tests {
             kind: ModelResourceKind::Bool,
             value: ResourceValue::Bool(false),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -198,6 +206,7 @@ mod tests {
             kind: ModelResourceKind::Bool,
             value: ResourceValue::Color("#FF0000".to_string()),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4);
@@ -216,6 +225,7 @@ mod tests {
             kind: ModelResourceKind::Bool,
             value: ResourceValue::Bool(true),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 8).unwrap();
@@ -235,6 +245,7 @@ mod tests {
             kind: ModelResourceKind::Bool,
             value: ResourceValue::Bool(true),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -261,6 +272,7 @@ mod tests {
                 kind: ModelResourceKind::Bool,
                 value: ResourceValue::Bool(true),
                 origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+                doc: None,
             };
 
             let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -287,6 +299,7 @@ mod tests {
                 name: name.to_string(),
                 kind: AstResourceKind::Bool,
                 value: ScalarValue::Bool(value),
+                doc: None,
             };
             let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -311,6 +324,7 @@ mod tests {
                 name: name.to_string(),
                 kind: AstResourceKind::Bool,
                 value: ScalarValue::Bool(value),
+                doc: None,
             };
             let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 

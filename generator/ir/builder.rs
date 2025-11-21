@@ -57,6 +57,15 @@ impl ResourceGraphBuilder {
                 crate::generator::parsing::ResourceKind::Template => {
                     "template"
                 }
+                crate::generator::parsing::ResourceKind::Array => {
+                    "array"
+                }
+                crate::generator::parsing::ResourceKind::Namespace | 
+                crate::generator::parsing::ResourceKind::Item |
+                crate::generator::parsing::ResourceKind::Doc => {
+                    // Skip structural tags, they don't create resources
+                    continue;
+                }
             };
 
             let Some(ty) = self.registry.find_by_name(type_name) else {
@@ -93,8 +102,9 @@ mod tests {
             vec![ParsedResource {
                 name: "auth/title".to_string(),
                 kind: ParsedKind::String,
-                value: ScalarValue::Text("Login".to_string()),
-            }],
+            value: ScalarValue::Text("Login".to_string()),
+            doc: None,
+        }],
         );
 
         let graph =
@@ -125,12 +135,14 @@ mod tests {
                         value: "3".to_string(),
                         explicit_type: None,
                     },
+                    doc: None,
                 },
                 ParsedResource {
                     name: "enabled".to_string(),
                     kind: ParsedKind::Bool,
-                    value: ScalarValue::Bool(true),
-                },
+            value: ScalarValue::Bool(true),
+            doc: None,
+        },
             ],
         );
 
@@ -168,6 +180,7 @@ mod tests {
                 name: "app_name".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("MyApp".to_string()),
+                doc: None,
             }],
         );
         let file2 = ParsedResourceFile::new(
@@ -177,6 +190,7 @@ mod tests {
                 name: "version".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("1.0.0".to_string()),
+                doc: None,
             }],
         );
 
@@ -193,6 +207,7 @@ mod tests {
                 name: "title".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("First".to_string()),
+                doc: None,
             }],
         );
         let file2 = ParsedResourceFile::new(
@@ -202,6 +217,7 @@ mod tests {
                 name: "title".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("Second".to_string()),
+                doc: None,
             }],
         );
 
@@ -231,8 +247,9 @@ mod tests {
             vec![ParsedResource {
                 name: "primary_color".to_string(),
                 kind: ParsedKind::Color,
-                value: ScalarValue::Color("#FF0000".to_string()),
-            }],
+            value: ScalarValue::Color("#FF0000".to_string()),
+            doc: None,
+        }],
         );
 
         let graph = ResourceGraphBuilder::from_parsed_files(&[parsed]);
@@ -256,12 +273,14 @@ mod tests {
                 ParsedResource {
                     name: "auth/title".to_string(),
                     kind: ParsedKind::String,
-                    value: ScalarValue::Text("Login".to_string()),
-                },
+            value: ScalarValue::Text("Login".to_string()),
+            doc: None,
+        },
                 ParsedResource {
                     name: "auth/error/message".to_string(),
                     kind: ParsedKind::String,
                     value: ScalarValue::Text("Invalid".to_string()),
+                    doc: None,
                 },
             ],
         );
@@ -297,6 +316,7 @@ mod tests {
                 name: "test_string".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("Test".to_string()),
+                doc: None,
             }],
         );
 
@@ -331,6 +351,7 @@ mod tests {
                     name: "valid_string".to_string(),
                     kind: ParsedKind::String,
                     value: ScalarValue::Text("Valid".to_string()),
+                    doc: None,
                 },
                 ParsedResource {
                     name: "invalid_number".to_string(),
@@ -339,6 +360,7 @@ mod tests {
                         value: "not_a_number".to_string(),
                         explicit_type: None,
                     },
+                    doc: None,
                 },
             ],
         );
@@ -364,6 +386,7 @@ mod tests {
                     name: "app_name".to_string(),
                     kind: ParsedKind::String,
                     value: ScalarValue::Text("MyApp".to_string()),
+                    doc: None,
                 },
                 ParsedResource {
                     name: "max_retries".to_string(),
@@ -372,17 +395,20 @@ mod tests {
                         value: "3".to_string(),
                         explicit_type: None,
                     },
+                    doc: None,
                 },
                 ParsedResource {
                     name: "enabled".to_string(),
                     kind: ParsedKind::Bool,
                     value: ScalarValue::Bool(true),
+                    doc: None,
                 },
                 ParsedResource {
                     name: "primary_color".to_string(),
                     kind: ParsedKind::Color,
-                    value: ScalarValue::Color("#FF0000".to_string()),
-                },
+            value: ScalarValue::Color("#FF0000".to_string()),
+            doc: None,
+        },
             ],
         );
 
@@ -424,6 +450,7 @@ mod tests {
                 name: "title".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("Hello".to_string()),
+                doc: None,
             }],
         );
 

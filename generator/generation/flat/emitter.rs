@@ -1,7 +1,7 @@
 //! Code emission for flat module generation
 
 use crate::generator::analysis::AnalysisWarning;
-use crate::generator::ir::{ResourceGraph, ResourceKey, ResourceNode, TypeRegistry};
+use crate::generator::ir::{ResourceGraph, ResourceKey, ResourceKind, ResourceNode, TypeRegistry};
 use crate::generator::utils::sanitize_identifier;
 use std::collections::HashMap;
 use std::fmt::Write as _;
@@ -116,7 +116,16 @@ fn emit_resource(
 
     // Find the type handler by matching ResourceKind
     for ty in ctx.registry.all() {
-        if ty.resource_kind() == params.node.kind {
+        let ty_kind = ty.resource_kind();
+        // For arrays, we need to match the variant, not the exact value
+        let matches = if matches!(ty_kind, ResourceKind::Array(_)) 
+            && matches!(params.node.kind, ResourceKind::Array(_)) {
+            true
+        } else {
+            ty_kind == params.node.kind
+        };
+        
+        if matches {
             if let Some(rust_code) = ty.emit_rust(params.key, params.node, params.indent) {
                 code.push_str(&rust_code);
             }

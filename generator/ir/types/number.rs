@@ -5,7 +5,7 @@ use crate::generator::ir::{
     ResourceValue,
 };
 use crate::generator::parsing::{ParsedResource, ScalarValue};
-use crate::generator::utils::sanitize_identifier;
+use crate::generator::utils::{format_doc, sanitize_identifier};
 use std::str::FromStr;
 
 pub struct NumberTypeHandler;
@@ -41,6 +41,7 @@ impl ResourceType for NumberTypeHandler {
                 kind: ResourceKind::Number,
                 value: ResourceValue::Number(number_value),
                 origin,
+                doc: parsed.doc.clone(),
             })
         } else {
             None
@@ -57,26 +58,27 @@ impl ResourceType for NumberTypeHandler {
             let pad = " ".repeat(indent);
             let const_name =
                 sanitize_identifier(&key.name).to_uppercase();
+            let doc_str = format_doc(&node.doc, indent);
 
             Some(match number_value {
                 NumberValue::Int(i) => format!(
-                    "{pad}pub const {const_name}: i64 = {i};\n"
+                    "{doc_str}{pad}pub const {const_name}: i64 = {i};\n"
                 ),
                 NumberValue::Float(f) => {
                     let formatted = format_float(*f);
-                    format!("{pad}pub const {const_name}: f64 = {formatted};\n")
+                    format!("{doc_str}{pad}pub const {const_name}: f64 = {formatted};\n")
                 }
                 NumberValue::BigDecimal(raw) => {
                     let literal = escape_literal(raw);
                     format!(
-                        "{pad}pub static {const_name}: std::sync::LazyLock<r_resources::BigDecimal> = std::sync::LazyLock::new(|| {{\n\
+                        "{doc_str}{pad}pub static {const_name}: std::sync::LazyLock<r_resources::BigDecimal> = std::sync::LazyLock::new(|| {{\n\
                         {pad}    r_resources::BigDecimal::from_str(\"{literal}\").expect(\"valid decimal literal\")\n\
                         {pad}}});\n"
                     )
                 }
                 NumberValue::Typed { literal, ty } => {
                     format!(
-                        "{pad}pub const {const_name}: {} = {};\n",
+                        "{doc_str}{pad}pub const {const_name}: {} = {};\n",
                         ty.as_str(),
                         literal
                     )
@@ -547,6 +549,7 @@ mod tests {
             kind: ModelResourceKind::Number,
             value: ResourceValue::Number(NumberValue::Int(42)),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -565,6 +568,7 @@ mod tests {
             kind: ModelResourceKind::Number,
             value: ResourceValue::Number(NumberValue::Float(3.14)),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -586,6 +590,7 @@ mod tests {
                 "12345678901234567890.123456789".to_string(),
             )),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -611,6 +616,7 @@ mod tests {
                 ty: NumberType::I8,
             }),
             origin: ResourceOrigin::new(PathBuf::from("test.xml"), false),
+            doc: None,
         };
 
         let result = handler.emit_rust(&key, &node, 4).unwrap();
@@ -628,6 +634,7 @@ mod tests {
                 value: "42".to_string(),
                 explicit_type: None,
             },
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -649,6 +656,7 @@ mod tests {
                 value: "127".to_string(),
                 explicit_type: Some("i8".to_string()),
             },
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 
@@ -670,6 +678,7 @@ mod tests {
                 value: "not_a_number".to_string(),
                 explicit_type: None,
             },
+            doc: None,
         };
         let origin = ResourceOrigin::new(PathBuf::from("test.xml"), false);
 

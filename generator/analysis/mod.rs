@@ -138,6 +138,7 @@ mod tests {
                 name: "title".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("First".to_string()),
+                doc: None,
             }],
         );
         let parsed2 = ParsedResourceFile::new(
@@ -147,6 +148,7 @@ mod tests {
                 name: "title".to_string(),
                 kind: ParsedKind::String,
                 value: ScalarValue::Text("Second".to_string()),
+                doc: None,
             }],
         );
 
@@ -187,6 +189,7 @@ mod tests {
                     name: "title".to_string(),
                     kind: ParsedKind::String,
                     value: ScalarValue::Text("Hello".to_string()),
+                    doc: None,
                 },
                 ParsedResource {
                     name: "count".to_string(),
@@ -195,6 +198,7 @@ mod tests {
                         value: "42".to_string(),
                         explicit_type: None,
                     },
+                    doc: None,
                 },
             ],
         );
