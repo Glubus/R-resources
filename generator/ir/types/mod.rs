@@ -14,10 +14,10 @@ use crate::generator::parsing::ParsedResource;
 
 /// Trait que chaque type de ressource doit implémenter
 pub trait ResourceType: Send + Sync {
-    /// Nom du type (ex: "string", "number", "bool")
+    /// Type name (e.g., "string", "number", "bool")
     fn name(&self) -> &'static str;
 
-    /// Tags XML qui correspondent à ce type (ex: ["string"], ["number", "int", "float"])
+    /// XML tags that correspond to this type (e.g., ["string"], ["number", "int", "float"])
     #[allow(dead_code)] // Reserved for future use
     fn xml_tags(&self) -> &'static [&'static str];
 
@@ -40,7 +40,7 @@ pub trait ResourceType: Send + Sync {
     ) -> Option<String>;
 }
 
-/// Registry globale des types de ressources
+/// Global registry for resource types
 pub struct TypeRegistry {
     types: Vec<Box<dyn ResourceType>>,
 }
